@@ -1,0 +1,8 @@
+{
+  "name": "my-budget",
+  "version": "1.0.0",
+  "description": "Yitsy's Budget Manager",
+  "dependencies": {
+    "googleapis": "^140.0.0"
+  }
+}
