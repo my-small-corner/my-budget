@@ -233,7 +233,33 @@
   .rec-amount { font-size: 13.5px; font-weight: 600; color: var(--red); }
   .rec-controls { display: flex; gap: 6px; align-items: center; }
 
-  .empty { text-align: center; padding: 30px 20px; color: var(--text-dim); }
+  /* SAVINGS */
+  .savings-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 24px; }
+  .savings-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; position: relative; overflow: hidden; }
+  .savings-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .savings-card:nth-child(1)::before { background: var(--accent); }
+  .savings-card:nth-child(2)::before { background: var(--accent2); }
+  .savings-card:nth-child(3)::before { background: var(--yellow); }
+  .savings-card:nth-child(4)::before { background: #f472b6; }
+  .savings-card-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+  .savings-card-balance { font-family: 'Instrument Serif', serif; font-size: 30px; letter-spacing: -1px; color: var(--accent); margin-bottom: 4px; }
+  .savings-card:nth-child(2) .savings-card-balance { color: var(--accent2); }
+  .savings-card:nth-child(3) .savings-card-balance { color: var(--yellow); }
+  .savings-card:nth-child(4) .savings-card-balance { color: #f472b6; }
+  .savings-card-monthly { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; }
+  .savings-card-monthly strong { color: var(--text-muted); }
+  .savings-edit-row { display: flex; gap: 8px; align-items: center; }
+  .savings-inp { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; width: 110px; }
+  .savings-inp:focus { border-color: var(--accent2); }
+  .savings-inp-label { font-size: 11px; color: var(--text-dim); }
+  .savings-update-btn { background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 12px; color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .savings-update-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .savings-history-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .savings-history-row:last-child { border-bottom: none; }
+  .savings-total-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 28px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .savings-total-label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+  .savings-total-value { font-family: 'Instrument Serif', serif; font-size: 36px; letter-spacing: -1px; color: var(--accent); }
+  .savings-total-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
   .empty .ico { font-size: 30px; margin-bottom: 9px; }
   .empty p { font-size: 13px; }
 
@@ -273,6 +299,7 @@
       <div class="nav-label">Menu</div>
       <div class="nav-item active" onclick="showView('dashboard')"><span class="icon">◉</span> Dashboard</div>
       <div class="nav-item" onclick="showView('expenses')"><span class="icon">⊟</span> Expenses</div>
+      <div class="nav-item" onclick="showView('savings')"><span class="icon">🏦</span> Savings</div>
       <div class="nav-item" onclick="showView('recurring')"><span class="icon">↻</span> Recurring</div>
       <div class="nav-item" onclick="showView('charts')"><span class="icon">◎</span> Charts</div>
       <div class="nav-item" onclick="showView('history')"><span class="icon">◷</span> History</div>
@@ -290,7 +317,7 @@
         <div class="cc-due-badge">💳 CC charges: 10th</div>
       </div>
     </div>
-    <div style="text-align:center;padding:12px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v1.2</div>
+    <div style="text-align:center;padding:12px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v1.5</div>
   </aside>
 
   <main class="main">
@@ -388,6 +415,33 @@
           </div>
           <button class="btn-add" id="add-btn" onclick="addExp()">+ Add</button>
         </div>
+      </div>
+    </div>
+
+    <!-- SAVINGS -->
+    <div class="view" id="view-savings">
+      <div class="page-header">
+        <h2>Savings</h2>
+        <p>Track your 4 savings accounts</p>
+      </div>
+      <!-- TOTAL -->
+      <div class="savings-total-card">
+        <div>
+          <div class="savings-total-label">💰 Total Savings (all accounts)</div>
+          <div class="savings-total-value" id="sav-total">₪0</div>
+          <div class="savings-total-sub" id="sav-total-monthly">₪0/month combined</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Monthly contributions</div>
+          <div style="font-size:22px;font-family:'Instrument Serif',serif;color:var(--text-muted);" id="sav-contributions">₪0</div>
+        </div>
+      </div>
+      <!-- 4 ACCOUNT CARDS -->
+      <div class="savings-grid" id="savings-cards"></div>
+      <!-- MONTHLY LOG -->
+      <div class="panel" style="max-width:680px;">
+        <div class="panel-header"><span class="panel-title">Monthly Contribution Log</span></div>
+        <div id="savings-log"></div>
       </div>
     </div>
 
@@ -501,7 +555,7 @@
     <!-- SETTINGS -->
     <div class="view" id="view-settings">
       <div class="page-header"><h2>Settings</h2><p>Your budget preferences</p></div>
-      <div class="panel" style="max-width:600px;">
+      <div class="panel" style="max-width:860px;">
         <div class="info-box">
           <strong>How this works:</strong> Everything is monthly. Salary, rent, and CC all tracked per month. CC charged on the 10th. Electricity, gas, water & arnona marked as "Bimonthly" so the AI knows they skip alternate months.
         </div>
@@ -518,7 +572,7 @@
         </div>
         <div class="sett-sect">
           <h3>Monthly Budget Limits by Category</h3>
-          <div id="cat-lims"></div>
+          <div id="cat-lims" style="display:grid;grid-template-columns:1fr 1fr;gap:0 24px;"></div>
         </div>
         <button class="save-btn" onclick="saveSettings()">Save Settings</button>
       </div>
@@ -599,10 +653,11 @@ function showView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  const map={dashboard:0,expenses:1,recurring:2,charts:3,history:4,advisor:5,settings:6};
+  const map={dashboard:0,expenses:1,savings:2,recurring:3,charts:4,history:5,advisor:6,settings:7};
   document.querySelectorAll('.nav-item')[map[id]]?.classList.add('active');
   if(id==='charts') renderCharts();
   if(id==='history') renderHistory();
+  if(id==='savings') renderSavings();
   renderSidebar();
 }
 function changeMonth(d){
@@ -831,6 +886,118 @@ async function delExp(id){
     renderDash(); renderExpenses();
     showToast('Deleted');
   } catch(e){ showToast('Error deleting'); }
+}
+
+// ═══════════════════════════════════════
+// SAVINGS
+// ═══════════════════════════════════════
+const SAV_ACCOUNTS = [
+  { id: 'yitsy',    name: 'Yitsy',    emoji: '👨', color: 'var(--accent)' },
+  { id: 'shulamit', name: 'Shulamit', emoji: '👩', color: 'var(--accent2)' },
+  { id: 'ayala',    name: 'Ayala',    emoji: '👧', color: 'var(--yellow)' },
+  { id: 'meital',   name: 'Meital',   emoji: '👧', color: '#f472b6' },
+];
+
+function getSavings() {
+  try { return JSON.parse(localStorage.getItem('yitsy_savings')) || initSavings(); }
+  catch(e) { return initSavings(); }
+}
+function initSavings() {
+  const s = {};
+  SAV_ACCOUNTS.forEach(a => { s[a.id] = { balance: 0, monthly: 0, provider: 'Harel', log: [] }; });
+  return s;
+}
+function saveSavings(data) { localStorage.setItem('yitsy_savings', JSON.stringify(data)); }
+
+function renderSavings() {
+  const data = getSavings();
+  let totalBalance = 0, totalMonthly = 0;
+  SAV_ACCOUNTS.forEach(a => {
+    totalBalance += data[a.id].balance || 0;
+    totalMonthly += data[a.id].monthly || 0;
+  });
+
+  document.getElementById('sav-total').textContent = fmt(totalBalance);
+  document.getElementById('sav-total-monthly').textContent = fmt(totalMonthly) + '/month combined';
+  document.getElementById('sav-contributions').textContent = fmt(totalMonthly) + '/mo';
+
+  // Render account cards
+  document.getElementById('savings-cards').innerHTML = SAV_ACCOUNTS.map(a => {
+    const acct = data[a.id];
+    const provider = acct.provider || 'Harel';
+    return `<div class="savings-card">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+        <div style="font-size:28px;">${a.emoji}</div>
+        <div>
+          <div class="savings-card-name">${a.name}'s Kupat Gemel</div>
+          <div style="font-size:11px;color:var(--text-dim);">🏛 ${provider}</div>
+        </div>
+      </div>
+      <div class="savings-card-balance">${fmt(acct.balance)}</div>
+      <div class="savings-card-monthly">Monthly direct debit: <strong>${fmt(acct.monthly)}</strong></div>
+      <div class="savings-edit-row" style="flex-wrap:wrap;gap:8px;">
+        <div>
+          <div class="savings-inp-label">Balance ₪</div>
+          <input class="savings-inp" id="sav-bal-${a.id}" type="number" value="${acct.balance}" placeholder="0">
+        </div>
+        <div>
+          <div class="savings-inp-label">Monthly ₪</div>
+          <input class="savings-inp" id="sav-mo-${a.id}" type="number" value="${acct.monthly}" placeholder="0">
+        </div>
+        <div>
+          <div class="savings-inp-label">Provider</div>
+          <input class="savings-inp" id="sav-prov-${a.id}" type="text" value="${provider}" placeholder="e.g. Harel" style="width:90px;">
+        </div>
+        <button class="savings-update-btn" onclick="updateSavings('${a.id}')">Update</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Monthly log — combine all accounts
+  const allLogs = [];
+  SAV_ACCOUNTS.forEach(a => {
+    (data[a.id].log || []).forEach(l => allLogs.push({ ...l, account: a.name }));
+  });
+  allLogs.sort((a, b) => b.date.localeCompare(a.date));
+
+  const logEl = document.getElementById('savings-log');
+  if (!allLogs.length) {
+    logEl.innerHTML = '<div class="empty"><p>No contributions logged yet. Update an account to log a contribution.</p></div>';
+  } else {
+    logEl.innerHTML = allLogs.slice(0, 20).map(l => `
+      <div class="savings-history-row">
+        <span>${l.account}</span>
+        <span style="color:var(--text-muted);font-size:12px;">${l.date}</span>
+        <span style="color:var(--accent);font-weight:600;">${fmt(l.amount)}</span>
+      </div>`).join('');
+  }
+}
+
+function updateSavings(id) {
+  const data = getSavings();
+  const newBalance = parseFloat(document.getElementById(`sav-bal-${id}`).value) || 0;
+  const newMonthly = parseFloat(document.getElementById(`sav-mo-${id}`).value) || 0;
+  const newProvider = document.getElementById(`sav-prov-${id}`).value.trim() || 'Harel';
+  const oldBalance = data[id].balance || 0;
+  const diff = newBalance - oldBalance;
+
+  data[id].balance = newBalance;
+  data[id].monthly = newMonthly;
+  data[id].provider = newProvider;
+
+  // Log the change if balance changed
+  if (diff !== 0) {
+    if (!data[id].log) data[id].log = [];
+    const today = new Date();
+    data[id].log.unshift({
+      date: `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`,
+      amount: diff,
+    });
+  }
+
+  saveSavings(data);
+  renderSavings();
+  showToast('Savings updated ✓');
 }
 
 // ═══════════════════════════════════════
@@ -1073,6 +1240,11 @@ function buildContext(){
   es.forEach(e=>{ byCat[e.cat]=(byCat[e.cat]||0)+e.amount; });
   const {m}=parseKey(S.cur);
 
+  const savData = getSavings();
+  const totalSav = SAV_ACCOUNTS.reduce((a,ac)=>a+(savData[ac.id].balance||0),0);
+  const totalSavMonthly = SAV_ACCOUNTS.reduce((a,ac)=>a+(savData[ac.id].monthly||0),0);
+  const savSummary = SAV_ACCOUNTS.map(ac=>`${ac.name} (${savData[ac.id].provider||'Harel'}): ₪${savData[ac.id].balance} balance, ₪${savData[ac.id].monthly}/mo direct debit`).join(' | ');
+
   return `You are a personal finance advisor for Yitsy, living in Rishon LeZion, Israel. Be warm, concise, and specific with ₪ amounts.
 
 BILLING SETUP:
@@ -1080,6 +1252,11 @@ BILLING SETUP:
 - Rent is paid monthly
 - Credit card (Israeli) charges go out on the 10th of every month
 - Bimonthly bills (electricity, gas, water, arnona) come every 2 months — marked as "Bimonthly" in the app
+
+SAVINGS ACCOUNTS:
+- Total savings: ₪${totalSav}
+- Total monthly contributions: ₪${totalSavMonthly}
+- Breakdown: ${savSummary}
 
 CURRENT MONTH: ${monthLabel(S.cur)}
 - Total expenses: ₪${total} | Remaining: ₪${rem}
