@@ -1045,7 +1045,7 @@ function renderSettings(){
   document.getElementById('cat-lims').innerHTML = CATS.map(c=>`
     <div class="sett-row">
       <div class="sett-info"><label>${c}</label></div>
-      <input class="lim-inp" data-cat="${c}" type="number" placeholder="No limit" value="${S.catBudgets[c]||''}">
+      <input class="lim-inp" data-cat="${c}" type="number" placeholder="" value="${S.catBudgets[c]||''}">
     </div>`).join('');
 }
 
