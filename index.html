@@ -57,7 +57,7 @@
   .month-picker-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-bottom: 10px; display: block; padding: 0 4px; }
   .month-box { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; }
   .month-nav-row { display: flex; align-items: center; justify-content: space-between; }
-  .month-nav-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 4px; }
+  .month-nav-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 18px; padding: 4px 10px; border-radius: 4px; }
   .month-nav-btn:hover { color: var(--text); background: var(--surface3); }
   .month-name { font-size: 13px; font-weight: 600; color: var(--text); text-align: center; flex: 1; }
   .cc-due-badge { display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 8px; background: rgba(129,140,248,0.1); border: 1px solid rgba(129,140,248,0.22); border-radius: 6px; padding: 5px 10px; font-size: 11px; color: var(--accent2); }
@@ -528,7 +528,7 @@
 // ═══════════════════════════════════════
 // CONFIG — update PASSWORD here
 // ═══════════════════════════════════════
-const APP_PASSWORD = 'Nutter290987'; // ← change this to whatever you want
+const APP_PASSWORD = 'yitsy2024'; // ← change this to whatever you want
 
 // ═══════════════════════════════════════
 // CONSTANTS
@@ -559,7 +559,7 @@ function prevKey(k){ const {y,m}=parseKey(k); return m===0?mkey(y-1,11):mkey(y,m
 function nextKey(k){ const {y,m}=parseKey(k); return m===11?mkey(y+1,0):mkey(y,m+1); }
 function monthLabel(k){ const {y,m}=parseKey(k); return `${MF[m]} ${y}`; }
 function monthShort(k){ const {y,m}=parseKey(k); return `${MS[m]} '${String(y).slice(2)}`; }
-function fmt(n){ return '₪'+Math.abs(n).toLocaleString('en-IL',{maximumFractionDigits:0}); }
+function fmt(n){ return '₪'+Math.abs(n).toLocaleString('he-IL',{maximumFractionDigits:0}); }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
 
 function loadLocal(){
@@ -1154,8 +1154,12 @@ async function init(){
 
   setTimeout(()=>{
     const {m}=parseKey(S.cur);
-    addMsg('q-msgs','assistant',`שלום Yitsy! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — CC charges out on 10th ${MF[m]}.\n\nAsk me anything!`);
-    addMsg('f-msgs','assistant',`שלום Yitsy! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• CC charged every 10th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
+    if(!document.getElementById('q-msgs').hasChildNodes()){
+      addMsg('q-msgs','assistant',`שלום Yitsy! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — CC charges out on 10th ${MF[m]}.\n\nAsk me anything!`);
+    }
+    if(!document.getElementById('f-msgs').hasChildNodes()){
+      addMsg('f-msgs','assistant',`שלום Yitsy! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• CC charged every 10th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
+    }
   },500);
 }
 </script>
