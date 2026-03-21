@@ -282,7 +282,7 @@
   <div class="login-box">
     <h1>Yitsy's <span>Budget</span></h1>
     <p>Enter your password to continue</p>
-    <input class="login-input" type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <input class="login-input" type="password" id="login-pw" placeholder="••••••••">
     <button class="login-btn" onclick="doLogin()">Enter</button>
     <div class="login-error" id="login-error"></div>
   </div>
@@ -651,6 +651,7 @@ function doLogout(){
   document.getElementById('login-pw').value='';
   document.getElementById('login-error').textContent='';
 }
+function doLogin(){
   const pw = document.getElementById('login-pw').value;
   const stored = localStorage.getItem('yitsy_pw') || APP_PASSWORD;
   if(pw === stored){
