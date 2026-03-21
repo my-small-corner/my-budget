@@ -131,20 +131,20 @@
   .sec-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); padding: 12px 10px 5px; font-weight: 600; }
 
   /* ADD FORM */
-  .add-form { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); flex-wrap: wrap; align-items: flex-end; }
-  .fg { display: flex; flex-direction: column; gap: 4px; }
-  .fg label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-dim); }
-  .fi { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 11px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s; }
+  .add-form { display: flex; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); flex-wrap: wrap; align-items: flex-end; }
+  .fg { display: flex; flex-direction: column; gap: 5px; }
+  .fg label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-dim); height: 16px; display: flex; align-items: center; }
+  .fi { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 11px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color 0.15s; height: 38px; }
   .fi:focus { border-color: var(--accent2); }
   .fi::placeholder { color: var(--text-dim); }
   .fi.nm { width: 140px; }
-  .fi.am { width: 84px; }
-  .fi.dt { width: 130px; }
-  .fsel { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 11px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; cursor: pointer; }
-  .file-upload-btn { background: var(--surface2); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; align-self: flex-end; display: flex; align-items: center; gap: 6px; }
+  .fi.am { width: 90px; }
+  .fi.dt { width: 140px; }
+  .fsel { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 11px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; cursor: pointer; height: 38px; }
+  .file-upload-btn { background: var(--surface2); border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 0 12px; color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: flex; align-items: center; gap: 6px; height: 38px; }
   .file-upload-btn:hover { border-color: var(--accent2); color: var(--text); }
   .file-upload-btn.has-file { border-color: var(--accent); color: var(--accent); border-style: solid; }
-  .btn-add { background: var(--accent); color: #0d0f14; border: none; border-radius: var(--radius-sm); padding: 9px 16px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: flex-end; }
+  .btn-add { background: var(--accent); color: #0d0f14; border: none; border-radius: var(--radius-sm); padding: 0 16px; height: 38px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; align-self: flex-end; display: flex; align-items: center; }
   .btn-add:hover { opacity: 0.85; }
   .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -248,11 +248,11 @@
   .savings-card:nth-child(4) .savings-card-balance { color: #f472b6; }
   .savings-card-monthly { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; }
   .savings-card-monthly strong { color: var(--text-muted); }
-  .savings-edit-row { display: flex; gap: 8px; align-items: center; }
-  .savings-inp { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; width: 110px; }
+  .savings-edit-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-top: 12px; }
+  .savings-inp { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 10px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; width: 110px; height: 36px; }
   .savings-inp:focus { border-color: var(--accent2); }
-  .savings-inp-label { font-size: 11px; color: var(--text-dim); }
-  .savings-update-btn { background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 12px; color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+  .savings-inp-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-dim); margin-bottom: 4px; }
+  .savings-update-btn { background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 14px; color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.15s; height: 36px; }
   .savings-update-btn:hover { border-color: var(--accent); color: var(--accent); }
   .savings-history-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .savings-history-row:last-child { border-bottom: none; }
@@ -317,7 +317,10 @@
         <div class="cc-due-badge">💳 CC charges: 10th</div>
       </div>
     </div>
-    <div style="text-align:center;padding:12px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v1.6</div>
+    <div style="padding:0 16px 8px;">
+      <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
+    </div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v1.8</div>
   </aside>
 
   <main class="main">
@@ -334,7 +337,7 @@
         <div class="stat-card income"><div class="stat-label">Monthly Income</div><div class="stat-value" id="s-income">₪0</div><div class="stat-sub">Net salary</div></div>
         <div class="stat-card expense"><div class="stat-label">Total Expenses</div><div class="stat-value" id="s-expenses">₪0</div><div class="stat-sub" id="s-count">0 items</div></div>
         <div class="stat-card savings"><div class="stat-label">Remaining</div><div class="stat-value" id="s-remaining">₪0</div><div class="stat-sub" id="s-rem-lbl">—</div></div>
-        <div class="stat-card rate"><div class="stat-label">Savings Rate</div><div class="stat-value" id="s-rate">0%</div><div class="stat-sub">of income saved</div></div>
+        <div class="stat-card rate"><div class="stat-label">Bank Balance</div><div class="stat-value" id="s-bank" style="color:var(--accent2);">₪0</div><div class="stat-sub">Current balance</div></div>
       </div>
       <div class="content-grid">
         <div>
@@ -380,24 +383,25 @@
         <div class="expense-list" id="list-reg"></div>
         <div class="add-form">
           <div class="fg"><label>Name</label><input class="fi nm" id="e-name" placeholder="Expense name…"></div>
-          <div class="fg"><label>Amount ₪</label><input class="fi am" id="e-amt" type="number" placeholder="0" min="0"></div>
+          <div class="fg"><label>Amount ₪</label><input class="fi am" id="e-amt" type="number" step="0.01" placeholder="0" min="0"></div>
           <div class="fg"><label>Date Paid</label><input class="fi dt" id="e-date" type="date"></div>
           <div class="fg"><label>Category</label>
             <select class="fsel" id="e-cat">
-              <option>🏠 Housing</option>
-              <option>🛒 Food & Groceries</option>
-              <option>🚗 Transport</option>
-              <option>💊 Health</option>
-              <option>🎬 Entertainment</option>
-              <option>👗 Clothing</option>
-              <option>📱 Subscriptions</option>
-              <option>📚 Education</option>
-              <option>💡 Electricity</option>
-              <option>🔥 Gas</option>
-              <option>💧 Water</option>
-              <option>🏛 Arnona</option>
-              <option>🔧 Maintenance</option>
-              <option>📦 Other</option>
+              <option value="🏠 Housing">🏠  Housing</option>
+              <option value="🛒 Food & Groceries">🛒  Food & Groceries</option>
+              <option value="🚗 Transport">🚗  Transport</option>
+              <option value="💊 Health">💊  Health</option>
+              <option value="🎬 Entertainment">🎬  Entertainment</option>
+              <option value="👗 Clothing">👗  Clothing</option>
+              <option value="📱 Subscriptions">📱  Subscriptions</option>
+              <option value="📚 Education">📚  Education</option>
+              <option value="💡 Electricity">💡  Electricity</option>
+              <option value="🔥 Gas">🔥  Gas</option>
+              <option value="💧 Water">💧  Water</option>
+              <option value="🏛 Arnona">🏛  Arnona</option>
+              <option value="🔧 Maintenance">🔧  Maintenance</option>
+              <option value="💰 Savings">💰  Savings</option>
+              <option value="📦 Other">📦  Other</option>
             </select>
           </div>
           <div class="fg"><label>Type</label>
@@ -459,20 +463,21 @@
           <div class="fg"><label>Amount ₪</label><input class="fi am" id="r-amt" type="number" placeholder="0" min="0"></div>
           <div class="fg"><label>Category</label>
             <select class="fsel" id="r-cat">
-              <option>🏠 Housing</option>
-              <option>🛒 Food & Groceries</option>
-              <option>🚗 Transport</option>
-              <option>💊 Health</option>
-              <option>🎬 Entertainment</option>
-              <option>👗 Clothing</option>
-              <option>📱 Subscriptions</option>
-              <option>📚 Education</option>
-              <option>💡 Electricity</option>
-              <option>🔥 Gas</option>
-              <option>💧 Water</option>
-              <option>🏛 Arnona</option>
-              <option>🔧 Maintenance</option>
-              <option>📦 Other</option>
+              <option value="🏠 Housing">🏠  Housing</option>
+              <option value="🛒 Food & Groceries">🛒  Food & Groceries</option>
+              <option value="🚗 Transport">🚗  Transport</option>
+              <option value="💊 Health">💊  Health</option>
+              <option value="🎬 Entertainment">🎬  Entertainment</option>
+              <option value="👗 Clothing">👗  Clothing</option>
+              <option value="📱 Subscriptions">📱  Subscriptions</option>
+              <option value="📚 Education">📚  Education</option>
+              <option value="💡 Electricity">💡  Electricity</option>
+              <option value="🔥 Gas">🔥  Gas</option>
+              <option value="💧 Water">💧  Water</option>
+              <option value="🏛 Arnona">🏛  Arnona</option>
+              <option value="🔧 Maintenance">🔧  Maintenance</option>
+              <option value="💰 Savings">💰  Savings</option>
+              <option value="📦 Other">📦  Other</option>
             </select>
           </div>
           <div class="fg"><label>Type</label>
@@ -563,7 +568,11 @@
           <h3>Income & Security</h3>
           <div class="sett-row">
             <div class="sett-info"><label>Monthly Salary (₪)</label><p>Your net monthly income after tax</p></div>
-            <input class="inc-inp" id="inc-inp" type="number" placeholder="₪ 0">
+            <input class="inc-inp" id="inc-inp" type="number" step="0.01" placeholder="0">
+          </div>
+          <div class="sett-row">
+            <div class="sett-info"><label>Current Bank Balance (₪)</label><p>Your main account balance right now</p></div>
+            <input class="inc-inp" id="bank-inp" type="number" step="0.01" placeholder="0" style="color:var(--accent2);">
           </div>
           <div class="sett-row">
             <div class="sett-info"><label>Site Password</label><p>Change your login password</p></div>
@@ -594,14 +603,15 @@ const APP_PASSWORD = 'yitsy2024'; // ← change this to whatever you want
 // ═══════════════════════════════════════
 const MF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏛 Arnona','🔧 Maintenance','📦 Other'];
-const CCOLS = ['#6ee7b7','#818cf8','#fb923c','#f87171','#fbbf24','#a78bfa','#34d399','#60a5fa','#f472b6','#94a3b8','#2dd4bf','#c084fc','#4ade80','#e2e8f0'];
+const CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏛 Arnona','🔧 Maintenance','💰 Savings','📦 Other'];
+const CCOLS = ['#6ee7b7','#818cf8','#fb923c','#f87171','#fbbf24','#a78bfa','#34d399','#60a5fa','#f472b6','#94a3b8','#2dd4bf','#c084fc','#4ade80','#facc15','#e2e8f0'];
 
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
 let S = {
   salary: 0,
+  bankBalance: 0,
   catBudgets: {},
   recurring: [],
   cur: null,
@@ -618,7 +628,10 @@ function prevKey(k){ const {y,m}=parseKey(k); return m===0?mkey(y-1,11):mkey(y,m
 function nextKey(k){ const {y,m}=parseKey(k); return m===11?mkey(y+1,0):mkey(y,m+1); }
 function monthLabel(k){ const {y,m}=parseKey(k); return `${MF[m]} ${y}`; }
 function monthShort(k){ const {y,m}=parseKey(k); return `${MS[m]} '${String(y).slice(2)}`; }
-function fmt(n){ return '₪'+Math.abs(n).toLocaleString('de-DE',{maximumFractionDigits:0}); }
+function fmt(n){ 
+  const abs = Math.abs(n);
+  return '₪' + abs.toLocaleString('de-DE', {minimumFractionDigits: abs % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2});
+}
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2); }
 
 function loadLocal(){
@@ -632,7 +645,12 @@ function saveLocal(){
 // ═══════════════════════════════════════
 // LOGIN
 // ═══════════════════════════════════════
-function doLogin(){
+function doLogout(){
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pw').value='';
+  document.getElementById('login-error').textContent='';
+}
   const pw = document.getElementById('login-pw').value;
   const stored = localStorage.getItem('yitsy_pw') || APP_PASSWORD;
   if(pw === stored){
@@ -776,7 +794,7 @@ function renderDash(){
   document.getElementById('s-count').textContent = es.length+' item'+(es.length!==1?'s':'');
   document.getElementById('s-remaining').textContent = fmt(rem);
   document.getElementById('s-rem-lbl').textContent = rem<0 ? '⚠ Over budget!' : 'Remaining';
-  document.getElementById('s-rate').textContent = (rate<0?'-':'')+Math.abs(rate)+'%';
+  document.getElementById('s-bank').textContent = fmt(S.bankBalance);
 
   const dl = document.getElementById('dash-list');
   dl.innerHTML = es.length
@@ -946,8 +964,8 @@ function renderSavings() {
           <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">${person}</div>
           <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent);margin-bottom:10px;">${fmt(acct.balance)}</div>
           <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-            <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="number" value="${acct.balance}" placeholder="0"></div>
-            <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="number" value="${acct.monthly}" placeholder="0"></div>
+            <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="number" step="0.01" value="${acct.balance}" placeholder="0"></div>
+            <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="number" step="0.01" value="${acct.monthly}" placeholder="0"></div>
             <div><div class="savings-inp-label">Provider</div><input class="savings-inp" id="sav-prov-${id}" type="text" value="${acct.provider||'Harel'}" placeholder="Harel" style="width:80px;"></div>
             <button class="savings-update-btn" onclick="updateSavings('${id}')">Update</button>
           </div>
@@ -970,8 +988,8 @@ function renderSavings() {
       <div class="savings-card-balance">${fmt(acct.balance)}</div>
       <div class="savings-card-monthly">Monthly direct debit: <strong>${fmt(acct.monthly)}</strong></div>
       <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;">
-        <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="number" value="${acct.balance}" placeholder="0"></div>
-        <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="number" value="${acct.monthly}" placeholder="0"></div>
+        <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="number" step="0.01" value="${acct.balance}" placeholder="0"></div>
+        <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="number" step="0.01" value="${acct.monthly}" placeholder="0"></div>
         <div><div class="savings-inp-label">Provider</div><input class="savings-inp" id="sav-prov-${id}" type="text" value="${acct.provider||'Harel'}" placeholder="Harel" style="width:80px;"></div>
         <button class="savings-update-btn" onclick="updateSavings('${id}')">Update</button>
       </div>
@@ -1236,6 +1254,7 @@ function exportCSV(){
 // ═══════════════════════════════════════
 function renderSettings(){
   document.getElementById('inc-inp').value = S.salary||'';
+  document.getElementById('bank-inp').value = S.bankBalance||'';
   document.getElementById('cat-lims').innerHTML = CATS.map(c=>`
     <div class="sett-row">
       <div class="sett-info"><label>${c}</label></div>
@@ -1245,6 +1264,7 @@ function renderSettings(){
 
 function saveSettings(){
   S.salary = parseFloat(document.getElementById('inc-inp').value)||0;
+  S.bankBalance = parseFloat(document.getElementById('bank-inp').value)||0;
   const newPw = document.getElementById('pw-inp').value;
   if(newPw) localStorage.setItem('yitsy_pw', newPw);
   document.querySelectorAll('.lim-inp').forEach(i=>{
