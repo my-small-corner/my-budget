@@ -282,7 +282,7 @@
   <div class="login-box">
     <h1>Yitsy's <span>Budget</span></h1>
     <p>Enter your password to continue</p>
-    <input class="login-input" type="password" id="login-pw" placeholder="••••••••">
+    <input class="login-input" type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Enter</button>
     <div class="login-error" id="login-error"></div>
   </div>
@@ -657,7 +657,9 @@ function doLogin(){
     document.getElementById('login-pw').value='';
   }
 }
-document.getElementById('login-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('login-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+});
 
 // ═══════════════════════════════════════
 // NAVIGATION
