@@ -124,7 +124,7 @@
   /* TAGS */
   .tag { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 99px; font-size: 10px; font-weight: 500; white-space: nowrap; }
   .tag.cc { background: rgba(129,140,248,0.13); color: var(--accent2); }
-  .tag.debit { background: rgba(52,211,153,0.13); color: #34d399; }
+  .tag.bank { background: rgba(96,165,250,0.13); color: #60a5fa; }
   .tag.bim { background: rgba(251,191,36,0.13); color: var(--yellow); }
   .tag.reg { background: rgba(110,231,183,0.1); color: var(--accent); }
   .tag.has-bill { background: rgba(129,140,248,0.1); color: var(--accent2); font-size: 10px; }
@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.2</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.6</div>
   </aside>
 
   <main class="main">
@@ -384,7 +384,7 @@
         <div class="expense-list" id="list-reg"></div>
         <div class="add-form">
           <div class="fg"><label>Name</label><input class="fi nm" id="e-name" placeholder="Expense name…"></div>
-          <div class="fg"><label>Amount ₪</label><input class="fi am" id="e-amt" type="number" step="0.01" placeholder="0" min="0"></div>
+          <div class="fg"><label>Amount ₪</label><input class="fi am" id="e-amt" type="text" inputmode="numeric" placeholder="0" onblur="liveFormat(this)"></div>
           <div class="fg"><label>Date Paid</label><input class="fi dt" id="e-date" type="date"></div>
           <div class="fg"><label>Category</label>
             <select class="fsel" id="e-cat"></select>
@@ -393,6 +393,7 @@
             <select class="fsel" id="e-type">
               <option value="cc">💳 Credit Card</option>
               <option value="debit">💰 Debit Card</option>
+              <option value="bank">🏦 Bank Transfer</option>
               <option value="bim">🔄 Bimonthly Bill</option>
               <option value="reg">📋 Regular / Monthly</option>
             </select>
@@ -446,7 +447,7 @@
         <div id="rec-list"></div>
         <div class="add-form">
           <div class="fg"><label>Name</label><input class="fi nm" id="r-name" placeholder="e.g. Rent"></div>
-          <div class="fg"><label>Amount ₪</label><input class="fi am" id="r-amt" type="number" placeholder="0" min="0"></div>
+          <div class="fg"><label>Amount ₪</label><input class="fi am" id="r-amt" type="text" inputmode="numeric" placeholder="0" onblur="liveFormat(this)"></div>
           <div class="fg"><label>Category</label>
             <select class="fsel" id="r-cat"></select>
           </div>
@@ -454,6 +455,7 @@
             <select class="fsel" id="r-type">
               <option value="cc">💳 Credit Card</option>
               <option value="debit">💰 Debit Card</option>
+              <option value="bank">🏦 Bank Transfer</option>
               <option value="bim">🔄 Bimonthly</option>
               <option value="reg">📋 Regular</option>
             </select>
@@ -538,11 +540,11 @@
           <h3>Income & Security</h3>
           <div class="sett-row">
             <div class="sett-info"><label>Monthly Salary (₪)</label><p>Your net monthly income after tax</p></div>
-            <input class="inc-inp" id="inc-inp" type="text" placeholder="0" inputmode="numeric">
+            <input class="inc-inp" id="inc-inp" type="text" placeholder="0" inputmode="numeric" onblur="liveFormat(this)">
           </div>
           <div class="sett-row">
             <div class="sett-info"><label>Current Bank Balance (₪)</label><p>Your main account balance right now</p></div>
-            <input class="inc-inp" id="bank-inp" type="text" placeholder="0" inputmode="numeric" style="color:var(--accent2);">
+            <input class="inc-inp" id="bank-inp" type="text" placeholder="0" inputmode="numeric" style="color:var(--accent2);" onblur="liveFormat(this)">
           </div>
           <div class="sett-row">
             <div class="sett-info"><label>Site Password</label><p>Change your login password</p></div>
@@ -553,33 +555,35 @@
         <!-- CATEGORIES + BUDGET LIMITS COMBINED -->
         <div class="sett-sect">
           <h3>Categories & Monthly Budget Limits</h3>
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set a monthly limit per category, or leave blank for no limit. Delete any category or add your own.</p>
-          <div id="cat-lims"></div>
-
-          <!-- ADD NEW CATEGORY + SAVE on same row -->
-          <div style="display:flex;gap:8px;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;position:relative;">
+          <!-- ADD NEW CATEGORY ROW — above grid -->
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap;position:relative;">
             <div class="fg">
               <label>Emoji</label>
               <div style="position:relative;">
-                <button id="emoji-btn" onclick="toggleEmojiPicker()" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <button id="emoji-btn" onclick="toggleEmojiPicker()" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
                   <span id="emoji-display">😀</span>
                 </button>
                 <input type="hidden" id="new-cat-emoji" value="😀">
-                <div id="emoji-popup" style="display:none;position:absolute;bottom:44px;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;z-index:100;width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+                <div id="emoji-popup" style="display:none;position:absolute;top:34px;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;z-index:100;width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
                   <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Pick an emoji</div>
                   <div id="emoji-grid" style="display:flex;flex-wrap:wrap;gap:2px;"></div>
                 </div>
               </div>
             </div>
             <div class="fg">
-              <label>Category Name</label>
-              <input class="fi" id="new-cat-name" type="text" placeholder="e.g. Pet Care" style="width:140px;height:32px;font-size:12px;" list="existing-cats" onkeydown="if(event.key==='Enter')addCategory()">
+              <label>New Category</label>
+              <input class="fi" id="new-cat-name" type="text" placeholder="e.g. Pet Care" style="width:130px;height:30px;font-size:12px;" list="existing-cats" onkeydown="if(event.key==='Enter')addCategory()">
               <datalist id="existing-cats"></datalist>
             </div>
-            <button class="btn-add" onclick="addCategory()" style="height:32px;font-size:12px;padding:0 12px;align-self:flex-end;">+ Add</button>
-            <div style="flex:1;"></div>
-            <button class="save-btn" onclick="saveSettings()" style="margin-top:0;align-self:flex-end;">Save Settings</button>
+            <button class="btn-add" onclick="addCategory()" style="height:30px;font-size:12px;padding:0 10px;align-self:flex-end;">+ Add</button>
           </div>
+          <!-- CATEGORY GRID -->
+          <div id="cat-lims"></div>
+          <!-- SAVE BUTTON bottom right -->
+          <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+            <button class="save-btn" onclick="saveSettings()" style="margin-top:0;">Save Settings</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -661,6 +665,18 @@ function doLogout(){
   document.getElementById('login-pw').value='';
   document.getElementById('login-error').textContent='';
 }
+function liveFormat(input){
+  const raw = parseInput(input.value);
+  const pos = input.selectionStart;
+  const oldLen = input.value.length;
+  if(raw > 0) {
+    input.value = fmtInput(raw);
+    // Preserve cursor position
+    const newLen = input.value.length;
+    input.setSelectionRange(pos + newLen - oldLen, pos + newLen - oldLen);
+  }
+}
+
 function doLogin(){
   const pw = document.getElementById('login-pw').value;
   const stored = localStorage.getItem('yitsy_pw') || APP_PASSWORD;
@@ -764,6 +780,7 @@ function renderSidebar(){
 function typeTag(t){
   if(t==='cc')    return '<span class="tag cc">💳 Credit Card</span>';
   if(t==='debit') return '<span class="tag debit">💰 Debit Card</span>';
+  if(t==='bank')  return '<span class="tag bank">🏦 Bank Transfer</span>';
   if(t==='bim')   return '<span class="tag bim">🔄 Bimonthly</span>';
   return '<span class="tag reg">📋 Monthly</span>';
 }
@@ -865,7 +882,7 @@ function handleFileSelect(input){
 // ═══════════════════════════════════════
 async function addExp(){
   const name = document.getElementById('e-name').value.trim();
-  const amount = parseFloat(document.getElementById('e-amt').value);
+  const amount = parseInput(document.getElementById('e-amt').value);
   const datePaid = document.getElementById('e-date').value;
   const cat = document.getElementById('e-cat').value;
   const type = document.getElementById('e-type').value;
@@ -978,8 +995,8 @@ function renderSavings() {
           <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">${person}</div>
           <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent);margin-bottom:10px;">${fmt(acct.balance)}</div>
           <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
-            <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0"></div>
-            <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.monthly)}" placeholder="0"></div>
+            <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0" onblur="liveFormat(this)"></div>
+            <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.monthly)}" placeholder="0" onblur="liveFormat(this)"></div>
             <div><div class="savings-inp-label">Provider</div><input class="savings-inp" id="sav-prov-${id}" type="text" value="${acct.provider||'Harel'}" placeholder="Harel" style="width:80px;"></div>
             <button class="savings-update-btn" onclick="updateSavings('${id}')">Update</button>
           </div>
@@ -1002,8 +1019,8 @@ function renderSavings() {
       <div class="savings-card-balance">${fmt(acct.balance)}</div>
       <div class="savings-card-monthly">Monthly direct debit: <strong>${fmt(acct.monthly)}</strong></div>
       <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;">
-        <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0"></div>
-        <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.monthly)}" placeholder="0"></div>
+        <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0" onblur="liveFormat(this)"></div>
+        <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.monthly)}" placeholder="0" onblur="liveFormat(this)"></div>
         <div><div class="savings-inp-label">Provider</div><input class="savings-inp" id="sav-prov-${id}" type="text" value="${acct.provider||'Harel'}" placeholder="Harel" style="width:80px;"></div>
         <button class="savings-update-btn" onclick="updateSavings('${id}')">Update</button>
       </div>
@@ -1083,7 +1100,7 @@ function renderRecurring(){
 
 function addRecurring(){
   const name = document.getElementById('r-name').value.trim();
-  const amount = parseFloat(document.getElementById('r-amt').value);
+  const amount = parseInput(document.getElementById('r-amt').value);
   const cat = document.getElementById('r-cat').value;
   const type = document.getElementById('r-type').value;
   if(!name||isNaN(amount)||amount<=0){ showToast('Enter name and amount'); return; }
@@ -1290,13 +1307,13 @@ function renderSettings(){
   if(dl) dl.innerHTML = getCats().map(c=>`<option value="${c.split(' ').slice(1).join(' ')}">`).join('');
   const cats = getCats();
   document.getElementById('cat-lims').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
       ${cats.map(c=>`
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;position:relative;">
-          <div style="font-size:13px;font-weight:500;margin-bottom:8px;padding-right:20px;">${c}</div>
-          <input class="lim-inp" data-cat="${c}" type="text" inputmode="numeric" placeholder="" value="${S.catBudgets[c] ? fmtInput(S.catBudgets[c]) : ''}" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;">
-          <button onclick="deleteCategory('${c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="Delete category"
-            style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:11px;padding:2px 4px;border-radius:4px;line-height:1;"
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;position:relative;">
+          <div style="font-size:11.5px;font-weight:500;margin-bottom:6px;padding-right:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c}</div>
+          <input class="lim-inp" data-cat="${c}" type="text" inputmode="numeric" placeholder="" value="${S.catBudgets[c] ? fmtInput(S.catBudgets[c]) : ''}" onblur="liveFormat(this)" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:4px 8px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+          <button onclick="deleteCategory('${c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="Delete"
+            style="position:absolute;top:7px;right:7px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:10px;padding:1px 3px;border-radius:3px;line-height:1;"
             onmouseover="this.style.color='var(--red)';this.style.background='var(--surface3)'"
             onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">✕</button>
         </div>`).join('')}
