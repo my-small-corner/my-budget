@@ -320,7 +320,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.8</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.9</div>
   </aside>
 
   <main class="main">
@@ -1372,7 +1372,7 @@ function saveSettings(){
     const v = parseInput(i.value);
     if(v>0) S.catBudgets[i.dataset.cat]=v; else delete S.catBudgets[i.dataset.cat];
   });
-  saveLocal(); renderDash();
+  saveLocal(); renderDash(); renderSettings();
   showToast('Settings saved ✓');
 }
 
