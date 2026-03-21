@@ -206,8 +206,8 @@
   /* SETTINGS */
   .info-box { background: rgba(129,140,248,0.07); border: 1px solid rgba(129,140,248,0.18); border-radius: var(--radius-sm); padding: 13px 16px; font-size: 12.5px; color: var(--text-muted); line-height: 1.65; margin-bottom: 22px; }
   .info-box strong { color: var(--accent2); }
-  .sett-sect { margin-bottom: 26px; }
-  .sett-sect h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .sett-sect { margin-bottom: 18px; }
+  .sett-sect h3 { font-size: 13px; font-weight: 600; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
   .sett-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 12px; }
   .sett-row:last-child { border-bottom: none; }
   .sett-info label { font-size: 13.5px; display: block; margin-bottom: 2px; }
@@ -320,7 +320,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.1</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.8</div>
   </aside>
 
   <main class="main">
@@ -339,18 +339,18 @@
         <div class="stat-card savings"><div class="stat-label">Remaining</div><div class="stat-value" id="s-remaining">₪0</div><div class="stat-sub" id="s-rem-lbl">—</div></div>
         <div class="stat-card rate"><div class="stat-label">Bank Balance</div><div class="stat-value" id="s-bank" style="color:var(--accent2);">₪0</div><div class="stat-sub">Current balance</div></div>
       </div>
-      <div class="content-grid">
-        <div>
+      <div class="content-grid" style="align-items:stretch;">
+        <div style="display:flex;flex-direction:column;gap:18px;">
           <div class="panel">
             <div class="panel-header"><span class="panel-title">This Month's Expenses</span><button class="panel-action" onclick="showView('expenses')">+ Add expense</button></div>
             <div id="dash-list"><div class="loading"><div class="spinner"></div> Loading expenses…</div></div>
           </div>
-          <div class="panel" style="margin-top:18px;">
+          <div class="panel" style="flex:1;">
             <div class="panel-header"><span class="panel-title">Category Breakdown</span></div>
             <div id="cat-bars"></div>
           </div>
         </div>
-        <div class="panel ai-panel">
+        <div class="panel ai-panel" style="height:100%;">
           <div class="panel-header"><span class="panel-title">✦ AI Advisor</span></div>
           <div class="ai-msgs" id="q-msgs"></div>
           <div class="chips">
@@ -529,9 +529,6 @@
     <div class="view" id="view-settings">
       <div class="page-header"><h2>Settings</h2><p>Your budget preferences</p></div>
       <div class="panel" style="max-width:1000px;">
-        <div class="info-box">
-          <strong>How this works:</strong> Everything is monthly. Salary, rent, and CC all tracked per month. CC charged on the 10th. Electricity, gas, water & arnona marked as "Bimonthly" so the AI knows they skip alternate months.
-        </div>
 
         <!-- INCOME & SECURITY -->
         <div class="sett-sect">
@@ -557,10 +554,19 @@
           <div id="cat-lims"></div>
 
           <!-- ADD NEW CATEGORY + SAVE on same row -->
-          <div style="display:flex;gap:8px;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;position:relative;">
             <div class="fg">
               <label>Emoji</label>
-              <input class="fi" id="new-cat-emoji" type="text" placeholder="🏷" maxlength="2" style="width:52px;text-align:center;font-size:18px;height:38px;">
+              <div style="position:relative;">
+                <button id="emoji-btn" onclick="toggleEmojiPicker()" style="width:38px;height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                  <span id="emoji-display">😀</span>
+                </button>
+                <input type="hidden" id="new-cat-emoji" value="😀">
+                <div id="emoji-popup" style="display:none;position:absolute;bottom:44px;left:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px;z-index:100;width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+                  <div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Pick an emoji</div>
+                  <div id="emoji-grid" style="display:flex;flex-wrap:wrap;gap:2px;"></div>
+                </div>
+              </div>
             </div>
             <div class="fg">
               <label>Category Name</label>
@@ -589,10 +595,17 @@ const APP_PASSWORD = 'yitsy2024'; // ← change this to whatever you want
 // ═══════════════════════════════════════
 const MF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DEFAULT_CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏘 Arnona','🔧 Maintenance','💰 Savings','📦 Other'];
+const DEFAULT_CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏢 Arnona','🔧 Maintenance','💰 Savings','📦 Other'];
 const CCOLS = ['#6ee7b7','#818cf8','#fb923c','#f87171','#fbbf24','#a78bfa','#34d399','#60a5fa','#f472b6','#94a3b8','#2dd4bf','#c084fc','#4ade80','#facc15','#e2e8f0'];
 function getCats(){ 
-  try { const c=localStorage.getItem('yitsy_cats'); return c?JSON.parse(c):DEFAULT_CATS; } 
+  try { 
+    const c=localStorage.getItem('yitsy_cats'); 
+    if(!c) return DEFAULT_CATS;
+    // Fix old Arnona emojis
+    const cats = JSON.parse(c);
+    const fixed = cats.map(cat => cat.replace('🏛 Arnona','🏢 Arnona').replace('🏙 Arnona','🏢 Arnona').replace('🏘 Arnona','🏢 Arnona'));
+    return fixed;
+  } 
   catch(e){ return DEFAULT_CATS; } 
 }
 function saveCats(cats){ localStorage.setItem('yitsy_cats', JSON.stringify(cats)); }
@@ -632,7 +645,7 @@ function loadLocal(){
   if(!S.cur) S.cur=curKey();
 }
 function saveLocal(){
-  localStorage.setItem('yitsy_settings', JSON.stringify({salary:S.salary,catBudgets:S.catBudgets,recurring:S.recurring,cur:S.cur}));
+  localStorage.setItem('yitsy_settings', JSON.stringify({salary:S.salary,bankBalance:S.bankBalance,catBudgets:S.catBudgets,recurring:S.recurring,cur:S.cur}));
 }
 
 // ═══════════════════════════════════════
@@ -772,8 +785,8 @@ function renderDash(){
   const bimT = es.filter(e=>e.type==='bim').reduce((a,e)=>a+e.amount,0);
   const {m} = parseKey(S.cur);
 
-  document.getElementById('dash-title').textContent = monthLabel(S.cur);
-  document.getElementById('dash-sub').textContent = `Monthly budget · CC charged 10th ${MF[m]}`;
+  document.getElementById('dash-title').textContent = "Overview";
+  document.getElementById('dash-sub').textContent = monthLabel(S.cur);
 
   document.getElementById('cc-bar').innerHTML=`
     <span class="lbl">💳 Credit Card</span>
@@ -1249,13 +1262,19 @@ function exportCSV(){
 // SETTINGS
 // ═══════════════════════════════════════
 function fmtInput(n){ 
-  const num = parseFloat(n);
-  if(isNaN(num) || num === 0) return '';
+  const num = Number(n);
+  if(!num || isNaN(num)) return '';
   return num.toLocaleString('de-DE', {maximumFractionDigits:2});
 }
 function parseInput(str){ 
-  // Remove dots (thousands), replace comma with dot (decimal)
-  return parseFloat(String(str).replace(/\./g,'').replace(',','.')) || 0;
+  if(!str) return 0;
+  str = String(str).trim();
+  // If has comma — treat dot as thousands, comma as decimal (de-DE format: 1.234,56)
+  if(str.includes(',')) return parseFloat(str.replace(/\./g,'').replace(',','.')) || 0;
+  // If has dot followed by exactly 3 digits at end — it's a thousands separator (5.000)
+  if(/\.\d{3}$/.test(str)) return parseFloat(str.replace(/\./g,'')) || 0;
+  // Otherwise treat dot as decimal
+  return parseFloat(str) || 0;
 }
 
 function renderSettings(){
@@ -1267,7 +1286,7 @@ function renderSettings(){
       ${cats.map(c=>`
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;position:relative;">
           <div style="font-size:13px;font-weight:500;margin-bottom:8px;padding-right:20px;">${c}</div>
-          <input class="lim-inp" data-cat="${c}" type="text" inputmode="numeric" placeholder="No limit" value="${S.catBudgets[c] ? fmtInput(S.catBudgets[c]) : ''}" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;">
+          <input class="lim-inp" data-cat="${c}" type="text" inputmode="numeric" placeholder="" value="${S.catBudgets[c] ? fmtInput(S.catBudgets[c]) : ''}" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;">
           <button onclick="deleteCategory('${c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="Delete category"
             style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:11px;padding:2px 4px;border-radius:4px;line-height:1;"
             onmouseover="this.style.color='var(--red)';this.style.background='var(--surface3)'"
@@ -1276,18 +1295,48 @@ function renderSettings(){
     </div>`;
 }
 
+const EMOJI_LIST = ['😀','😎','🏠','🛒','🚗','💊','🎬','👗','📱','📚','💡','🔥','💧','🏢','🔧','💰','📦','🍕','✈️','🐕','👶','🎮','🎵','📷','🎁','💻','📺','⚽','🍔','☕','🌿','💉','🏥','📝','🚌','🛍','💈','🧴','🎯','🏖'];
+
+function toggleEmojiPicker(){
+  const p = document.getElementById('emoji-popup');
+  if(p.style.display === 'none'){
+    // Build grid
+    const grid = document.getElementById('emoji-grid');
+    grid.innerHTML = EMOJI_LIST.map(e=>
+      `<button onclick="selectEmoji('${e}')" style="background:none;border:none;cursor:pointer;font-size:18px;width:30px;height:30px;border-radius:6px;" onmouseover="this.style.background='var(--surface3)'" onmouseout="this.style.background='none'">${e}</button>`
+    ).join('');
+    p.style.display = 'block';
+  } else {
+    p.style.display = 'none';
+  }
+}
+function selectEmoji(e){
+  document.getElementById('new-cat-emoji').value = e;
+  document.getElementById('emoji-display').textContent = e;
+  document.getElementById('emoji-popup').style.display = 'none';
+}
+// Close emoji picker when clicking outside
+document.addEventListener('click', function(e){
+  const btn = document.getElementById('emoji-btn');
+  const popup = document.getElementById('emoji-popup');
+  if(popup && btn && !btn.contains(e.target) && !popup.contains(e.target)){
+    popup.style.display = 'none';
+  }
+});
+
 function addCategory(){
-  const emojiInput = document.getElementById('new-cat-emoji').value.trim();
+  const emojiRaw = document.getElementById('new-cat-emoji').value.trim();
   const name = document.getElementById('new-cat-name').value.trim();
   if(!name){ showToast('Enter a category name'); return; }
-  // Use typed emoji or default
-  const emoji = emojiInput || '📦';
+  const emoji = [...emojiRaw][0] || '📦';
   const label = `${emoji} ${name}`;
   const cats = getCats();
   if(cats.find(c=>c.toLowerCase()===label.toLowerCase())){ showToast('Category already exists'); return; }
   cats.push(label);
   saveCats(cats);
-  document.getElementById('new-cat-emoji').value='';
+  document.getElementById('new-cat-emoji').value='😀';
+  const disp = document.getElementById('emoji-display');
+  if(disp) disp.textContent='😀';
   document.getElementById('new-cat-name').value='';
   renderSettings();
   rebuildDropdowns();
