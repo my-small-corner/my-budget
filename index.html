@@ -320,7 +320,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v1.9</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.0</div>
   </aside>
 
   <main class="main">
@@ -532,6 +532,8 @@
         <div class="info-box">
           <strong>How this works:</strong> Everything is monthly. Salary, rent, and CC all tracked per month. CC charged on the 10th. Electricity, gas, water & arnona marked as "Bimonthly" so the AI knows they skip alternate months.
         </div>
+
+        <!-- INCOME & SECURITY -->
         <div class="sett-sect">
           <h3>Income & Security</h3>
           <div class="sett-row">
@@ -547,20 +549,27 @@
             <input class="pw-inp" id="pw-inp" type="password" placeholder="New password…">
           </div>
         </div>
+
+        <!-- CATEGORIES + BUDGET LIMITS COMBINED -->
         <div class="sett-sect">
-          <h3>Category Manager</h3>
-          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">Add or remove categories — changes sync to all dropdowns and budget limits automatically.</p>
-          <div id="cat-manager-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <input class="fi" id="new-cat-emoji" type="text" placeholder="😀" style="width:52px;text-align:center;font-size:18px;">
-            <input class="fi" id="new-cat-name" type="text" placeholder="Category name…" style="width:180px;" onkeydown="if(event.key==='Enter')addCategory()">
-            <button class="btn-add" onclick="addCategory()" style="height:38px;">+ Add Category</button>
+          <h3>Categories & Monthly Budget Limits</h3>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set a monthly limit per category, or leave blank for no limit. Delete any category or add your own.</p>
+          <div id="cat-lims"></div>
+
+          <!-- ADD NEW CATEGORY -->
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;">
+            <div class="fg">
+              <label>Emoji</label>
+              <input class="fi" id="new-cat-emoji" type="text" placeholder="🏷" style="width:52px;text-align:center;font-size:18px;height:38px;">
+            </div>
+            <div class="fg">
+              <label>Category Name</label>
+              <input class="fi" id="new-cat-name" type="text" placeholder="e.g. Pet Care" style="width:200px;" onkeydown="if(event.key==='Enter')addCategory()">
+            </div>
+            <button class="btn-add" onclick="addCategory()" style="height:38px;align-self:flex-end;">+ Add Category</button>
           </div>
         </div>
-        <div class="sett-sect">
-          <h3>Monthly Budget Limits by Category</h3>
-          <div id="cat-lims" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0 20px;"></div>
-        </div>
+
         <button class="save-btn" onclick="saveSettings()">Save Settings</button>
       </div>
     </div>
@@ -1250,14 +1259,19 @@ function parseInput(str){
 function renderSettings(){
   document.getElementById('inc-inp').value = fmtInput(S.salary);
   document.getElementById('bank-inp').value = fmtInput(S.bankBalance);
-  renderCatManager();
   const cats = getCats();
-  document.getElementById('cat-lims').innerHTML = cats.map(c=>`
-    <div class="sett-row" style="flex-direction:column;align-items:flex-start;gap:5px;padding:10px 0;">
-      <div style="font-size:12px;color:var(--text-muted);">${c}</div>
-      <input class="lim-inp" data-cat="${c}" type="text" inputmode="numeric" placeholder="No limit" value="${S.catBudgets[c] ? fmtInput(S.catBudgets[c]) : ''}">
-    </div>`).join('');
-}
+  document.getElementById('cat-lims').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      ${cats.map(c=>`
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;position:relative;">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px;padding-right:20px;">${c}</div>
+          <input class="lim-inp" data-cat="${c}" type="text" inputmode="numeric" placeholder="No limit" value="${S.catBudgets[c] ? fmtInput(S.catBudgets[c]) : ''}" style="width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;color:var(--text);font-family:inherit;font-size:13px;outline:none;">
+          <button onclick="deleteCategory('${c.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')" title="Delete category"
+            style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:11px;padding:2px 4px;border-radius:4px;line-height:1;"
+            onmouseover="this.style.color='var(--red)';this.style.background='var(--surface3)'"
+            onmouseout="this.style.color='var(--text-dim)';this.style.background='none'">✕</button>
+        </div>`).join('')}
+    </div>`;
 
 function addCategory(){
   const emoji = document.getElementById('new-cat-emoji').value.trim();
@@ -1285,14 +1299,6 @@ function deleteCategory(cat){
   showToast('Category removed');
 }
 
-function renderCatManager(){
-  const cats = getCats();
-  document.getElementById('cat-manager-list').innerHTML = cats.map(c=>`
-    <div style="display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:13px;">
-      <span>${c}</span>
-      <button onclick="deleteCategory('${c.replace(/'/g,"\\'")}')" style="background:none;border:none;cursor:pointer;color:var(--text-dim);font-size:12px;padding:0 0 0 4px;line-height:1;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-dim)'">✕</button>
-    </div>`).join('');
-}
 
 function rebuildDropdowns(){
   const cats = getCats();
