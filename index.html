@@ -124,6 +124,7 @@
   /* TAGS */
   .tag { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 99px; font-size: 10px; font-weight: 500; white-space: nowrap; }
   .tag.cc { background: rgba(129,140,248,0.13); color: var(--accent2); }
+  .tag.debit { background: rgba(52,211,153,0.13); color: #34d399; }
   .tag.bim { background: rgba(251,191,36,0.13); color: var(--yellow); }
   .tag.reg { background: rgba(110,231,183,0.1); color: var(--accent); }
   .tag.has-bill { background: rgba(129,140,248,0.1); color: var(--accent2); font-size: 10px; }
@@ -320,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.9</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.2</div>
   </aside>
 
   <main class="main">
@@ -391,6 +392,7 @@
           <div class="fg"><label>Type</label>
             <select class="fsel" id="e-type">
               <option value="cc">💳 Credit Card</option>
+              <option value="debit">💰 Debit Card</option>
               <option value="bim">🔄 Bimonthly Bill</option>
               <option value="reg">📋 Regular / Monthly</option>
             </select>
@@ -451,6 +453,7 @@
           <div class="fg"><label>Type</label>
             <select class="fsel" id="r-type">
               <option value="cc">💳 Credit Card</option>
+              <option value="debit">💰 Debit Card</option>
               <option value="bim">🔄 Bimonthly</option>
               <option value="reg">📋 Regular</option>
             </select>
@@ -558,7 +561,7 @@
             <div class="fg">
               <label>Emoji</label>
               <div style="position:relative;">
-                <button id="emoji-btn" onclick="toggleEmojiPicker()" style="width:38px;height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <button id="emoji-btn" onclick="toggleEmojiPicker()" style="width:32px;height:32px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
                   <span id="emoji-display">😀</span>
                 </button>
                 <input type="hidden" id="new-cat-emoji" value="😀">
@@ -570,9 +573,10 @@
             </div>
             <div class="fg">
               <label>Category Name</label>
-              <input class="fi" id="new-cat-name" type="text" placeholder="e.g. Pet Care" style="width:200px;" onkeydown="if(event.key==='Enter')addCategory()">
+              <input class="fi" id="new-cat-name" type="text" placeholder="e.g. Pet Care" style="width:140px;height:32px;font-size:12px;" list="existing-cats" onkeydown="if(event.key==='Enter')addCategory()">
+              <datalist id="existing-cats"></datalist>
             </div>
-            <button class="btn-add" onclick="addCategory()" style="height:38px;align-self:flex-end;">+ Add Category</button>
+            <button class="btn-add" onclick="addCategory()" style="height:32px;font-size:12px;padding:0 12px;align-self:flex-end;">+ Add</button>
             <div style="flex:1;"></div>
             <button class="save-btn" onclick="saveSettings()" style="margin-top:0;align-self:flex-end;">Save Settings</button>
           </div>
@@ -758,8 +762,9 @@ function renderSidebar(){
 }
 
 function typeTag(t){
-  if(t==='cc')  return '<span class="tag cc">💳 CC</span>';
-  if(t==='bim') return '<span class="tag bim">🔄 Bimonthly</span>';
+  if(t==='cc')    return '<span class="tag cc">💳 Credit Card</span>';
+  if(t==='debit') return '<span class="tag debit">💰 Debit Card</span>';
+  if(t==='bim')   return '<span class="tag bim">🔄 Bimonthly</span>';
   return '<span class="tag reg">📋 Monthly</span>';
 }
 
@@ -1280,6 +1285,9 @@ function parseInput(str){
 function renderSettings(){
   document.getElementById('inc-inp').value = fmtInput(S.salary);
   document.getElementById('bank-inp').value = fmtInput(S.bankBalance);
+  // Populate category name datalist
+  const dl = document.getElementById('existing-cats');
+  if(dl) dl.innerHTML = getCats().map(c=>`<option value="${c.split(' ').slice(1).join(' ')}">`).join('');
   const cats = getCats();
   document.getElementById('cat-lims').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
