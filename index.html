@@ -320,7 +320,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.0</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v2.1</div>
   </aside>
 
   <main class="main">
@@ -556,21 +556,20 @@
           <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set a monthly limit per category, or leave blank for no limit. Delete any category or add your own.</p>
           <div id="cat-lims"></div>
 
-          <!-- ADD NEW CATEGORY -->
+          <!-- ADD NEW CATEGORY + SAVE on same row -->
           <div style="display:flex;gap:8px;align-items:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;">
             <div class="fg">
               <label>Emoji</label>
-              <input class="fi" id="new-cat-emoji" type="text" placeholder="🏷" style="width:52px;text-align:center;font-size:18px;height:38px;">
+              <input class="fi" id="new-cat-emoji" type="text" placeholder="🏷" maxlength="2" style="width:52px;text-align:center;font-size:18px;height:38px;">
             </div>
             <div class="fg">
               <label>Category Name</label>
               <input class="fi" id="new-cat-name" type="text" placeholder="e.g. Pet Care" style="width:200px;" onkeydown="if(event.key==='Enter')addCategory()">
             </div>
             <button class="btn-add" onclick="addCategory()" style="height:38px;align-self:flex-end;">+ Add Category</button>
+            <div style="flex:1;"></div>
+            <button class="save-btn" onclick="saveSettings()" style="margin-top:0;align-self:flex-end;">Save Settings</button>
           </div>
-        </div>
-
-        <button class="save-btn" onclick="saveSettings()">Save Settings</button>
       </div>
     </div>
 
@@ -590,7 +589,7 @@ const APP_PASSWORD = 'yitsy2024'; // ← change this to whatever you want
 // ═══════════════════════════════════════
 const MF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DEFAULT_CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏙 Arnona','🔧 Maintenance','💰 Savings','📦 Other'];
+const DEFAULT_CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏘 Arnona','🔧 Maintenance','💰 Savings','📦 Other'];
 const CCOLS = ['#6ee7b7','#818cf8','#fb923c','#f87171','#fbbf24','#a78bfa','#34d399','#60a5fa','#f472b6','#94a3b8','#2dd4bf','#c084fc','#4ade80','#facc15','#e2e8f0'];
 function getCats(){ 
   try { const c=localStorage.getItem('yitsy_cats'); return c?JSON.parse(c):DEFAULT_CATS; } 
@@ -1250,8 +1249,9 @@ function exportCSV(){
 // SETTINGS
 // ═══════════════════════════════════════
 function fmtInput(n){ 
-  if(!n && n!==0) return '';
-  return Number(n).toLocaleString('de-DE', {maximumFractionDigits:2});
+  const num = parseFloat(n);
+  if(isNaN(num) || num === 0) return '';
+  return num.toLocaleString('de-DE', {maximumFractionDigits:2});
 }
 function parseInput(str){ 
   // Remove dots (thousands), replace comma with dot (decimal)
@@ -1263,7 +1263,7 @@ function renderSettings(){
   document.getElementById('bank-inp').value = fmtInput(S.bankBalance);
   const cats = getCats();
   document.getElementById('cat-lims').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;">
       ${cats.map(c=>`
         <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;position:relative;">
           <div style="font-size:13px;font-weight:500;margin-bottom:8px;padding-right:20px;">${c}</div>
@@ -1277,19 +1277,21 @@ function renderSettings(){
 }
 
 function addCategory(){
-  const emoji = document.getElementById('new-cat-emoji').value.trim();
+  const emojiInput = document.getElementById('new-cat-emoji').value.trim();
   const name = document.getElementById('new-cat-name').value.trim();
   if(!name){ showToast('Enter a category name'); return; }
-  const label = emoji ? `${emoji} ${name}` : `📦 ${name}`;
+  // Use typed emoji or default
+  const emoji = emojiInput || '📦';
+  const label = `${emoji} ${name}`;
   const cats = getCats();
-  if(cats.includes(label)){ showToast('Category already exists'); return; }
+  if(cats.find(c=>c.toLowerCase()===label.toLowerCase())){ showToast('Category already exists'); return; }
   cats.push(label);
   saveCats(cats);
   document.getElementById('new-cat-emoji').value='';
   document.getElementById('new-cat-name').value='';
   renderSettings();
   rebuildDropdowns();
-  showToast('Category added ✓');
+  showToast(`"${label}" added ✓`);
 }
 
 function deleteCategory(cat){
