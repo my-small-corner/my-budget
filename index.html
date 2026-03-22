@@ -107,16 +107,23 @@
   .panel-action:hover { text-decoration: underline; }
 
   /* EXPENSE ROWS */
-  .expense-list { width: 100%; border-collapse: collapse; display: table; }
+  .expense-list { width: 100%; display: table; border-collapse: collapse; }
   .exp-item { display: table-row; cursor: pointer; }
-  .exp-item:hover td, .exp-item:hover > div { background: var(--surface2); }
-  .exp-item > div { display: table-cell; padding: 8px 6px; vertical-align: middle; border-bottom: 1px solid var(--border); }
-  .exp-icon-cell { width: 36px; }
+  .exp-item:hover .exp-icon-cell,
+  .exp-item:hover .exp-info-cell,
+  .exp-item:hover .exp-amount-cell,
+  .exp-item:hover .exp-controls-cell { background: var(--surface2); }
+  .exp-icon-cell, .exp-info-cell, .exp-amount-cell, .exp-controls-cell { display: table-cell; padding: 8px 4px; vertical-align: middle; border-bottom: 1px solid var(--border); }
+  .exp-icon-cell { width: 36px; padding-left: 2px; }
+  .exp-info-cell { width: auto; }
+  .exp-amount-cell { width: 120px; text-align: right; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--red); font-variant-numeric: tabular-nums; padding-right: 10px; }
+  .exp-controls-cell { width: 28px; padding-right: 2px; }
   .exp-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--surface3); }
   .exp-name { font-size: 13px; font-weight: 500; }
-  .exp-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-  .exp-amount-cell { width: 110px; text-align: right; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--red); font-variant-numeric: tabular-nums; padding-right: 8px; }
-  .exp-controls-cell { width: 56px; text-align: right; }
+  .exp-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 0; }
+  .exp-meta-cat { width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
+  .exp-meta-type { width: 120px; flex-shrink: 0; }
+  .exp-meta-date { width: 85px; flex-shrink: 0; white-space: nowrap; }
   .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; justify-content: flex-end; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
@@ -324,7 +331,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.5</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.7</div>
   </aside>
 
   <main class="main">
@@ -830,13 +837,18 @@ function typeTag(t){
 function expRow(e){
   const icon = e.cat.split(' ')[0];
   const catName = e.cat.split(' ').slice(1).join(' ');
-  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent2);text-decoration:none;">📄</a>` : '';
+  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent2);text-decoration:none;" title="View bill">📄</a>` : '';
   const datePaid = e.datePaid || '—';
   return `<div class="exp-item" onclick="editExp('${e.id}')" title="Click to edit">
     <div class="exp-icon-cell"><div class="exp-icon">${icon}</div></div>
-    <div>
+    <div class="exp-info-cell">
       <div class="exp-name">${e.name}</div>
-      <div class="exp-meta">${catName} &nbsp;${typeTag(e.type)}&nbsp; ${datePaid} ${billBtn}</div>
+      <div class="exp-meta">
+        <span class="exp-meta-cat">${catName}</span>
+        <span class="exp-meta-type">${typeTag(e.type)}</span>
+        <span class="exp-meta-date">${datePaid}</span>
+        ${billBtn}
+      </div>
     </div>
     <div class="exp-amount-cell">${fmt(e.amount)}</div>
     <div class="exp-controls-cell"><div class="exp-controls" onclick="event.stopPropagation()"><button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div></div>
@@ -938,13 +950,17 @@ function renderExpenses(){
     if(!items.length) return '';
     const groupTotal = items.reduce((a,e)=>a+e.amount,0);
     const rows = [...items].sort((a,b)=>b.amount-a.amount).map(expRow).join('');
-    return `<div class="panel" style="break-inside:avoid;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div>
-          <div style="font-size:14px;font-weight:600;">${g.label}</div>
-          ${g.note?`<div style="font-size:11px;color:var(--text-dim);">${g.note}</div>`:''}
+    return `<div class="panel" style="break-inside:avoid;padding:16px 22px;">
+      <div style="display:table;width:100%;margin-bottom:10px;">
+        <div style="display:table-row;">
+          <div style="display:table-cell;width:36px;"></div>
+          <div style="display:table-cell;">
+            <div style="font-size:14px;font-weight:600;">${g.label}</div>
+            ${g.note?`<div style="font-size:11px;color:var(--text-dim);">${g.note}</div>`:''}
+          </div>
+          <div style="display:table-cell;width:120px;text-align:right;font-size:15px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;padding-right:10px;">${fmt(groupTotal)}</div>
+          <div style="display:table-cell;width:28px;"></div>
         </div>
-        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--red);">${fmt(groupTotal)}</div>
       </div>
       <div class="expense-list">${rows}</div>
     </div>`;
