@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yitsy's Budget</title>
+<title>My Family Budget</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -281,7 +281,7 @@
 <!-- LOGIN -->
 <div class="login-screen" id="login-screen">
   <div class="login-box">
-    <h1>Yitsy's <span>Budget</span></h1>
+    <h1>My Family <span>Budget</span></h1>
     <p>Enter your password to continue</p>
     <input class="login-input" type="password" id="login-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">Enter</button>
@@ -293,7 +293,7 @@
 <div class="app" id="app">
   <aside class="sidebar">
     <div class="logo">
-      <h1>Yitsy's <span>Budget</span></h1>
+      <h1>My Family <span>Budget</span></h1>
       <p>Finance Tracker 🇮🇱</p>
     </div>
     <div class="nav-section">
@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.7</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.9</div>
   </aside>
 
   <main class="main">
@@ -398,11 +398,8 @@
               <option value="reg">📋 Regular / Monthly</option>
             </select>
           </div>
-          <div class="fg"><label>Bill File (optional)</label>
-            <label class="file-upload-btn" id="upload-label">
-              📎 Attach bill
-              <input type="file" id="e-file" accept=".pdf,image/*" style="display:none" onchange="handleFileSelect(this)">
-            </label>
+          <div class="fg"><label>Bill URL (optional)</label>
+            <input class="fi" id="e-bill-url" type="text" placeholder="Paste Google Drive link…" style="width:180px;">
           </div>
           <button class="btn-add" id="add-btn" onclick="addExp()">+ Add</button>
         </div>
@@ -677,10 +674,19 @@ function liveFormat(input){
   }
 }
 
+function doLogout(){
+  localStorage.removeItem('yitsy_logged_in');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pw').value='';
+  document.getElementById('login-error').textContent='';
+}
+
 function doLogin(){
   const pw = document.getElementById('login-pw').value;
   const stored = localStorage.getItem('yitsy_pw') || APP_PASSWORD;
   if(pw === stored){
+    localStorage.setItem('yitsy_logged_in','1');
     document.getElementById('login-screen').style.display='none';
     document.getElementById('app').classList.add('visible');
     init();
@@ -689,8 +695,15 @@ function doLogin(){
     document.getElementById('login-pw').value='';
   }
 }
-document.addEventListener('DOMContentLoaded', ()=>{
+
+// Auto-login if already logged in
+window.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('login-pw').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  if(localStorage.getItem('yitsy_logged_in')==='1'){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').classList.add('visible');
+    init();
+  }
 });
 
 // ═══════════════════════════════════════
@@ -871,10 +884,22 @@ let selectedFile = null;
 function handleFileSelect(input){
   selectedFile = input.files[0];
   const label = document.getElementById('upload-label');
+  const clearBtn = document.getElementById('clear-file-btn');
   if(selectedFile){
-    label.textContent = '✓ ' + selectedFile.name.slice(0,20)+(selectedFile.name.length>20?'…':'');
+    label.childNodes[0].textContent = '✓ ' + selectedFile.name.slice(0,20)+(selectedFile.name.length>20?'…':'');
     label.classList.add('has-file');
+    if(clearBtn) clearBtn.style.display='block';
   }
+}
+
+function clearFile(){
+  selectedFile = null;
+  document.getElementById('e-file').value='';
+  const label = document.getElementById('upload-label');
+  const clearBtn = document.getElementById('clear-file-btn');
+  label.childNodes[0].textContent = '📎 Attach bill';
+  label.classList.remove('has-file');
+  if(clearBtn) clearBtn.style.display='none';
 }
 
 // ═══════════════════════════════════════
@@ -886,23 +911,16 @@ async function addExp(){
   const datePaid = document.getElementById('e-date').value;
   const cat = document.getElementById('e-cat').value;
   const type = document.getElementById('e-type').value;
+  const billUrl = document.getElementById('e-bill-url').value.trim();
   if(!name || isNaN(amount) || amount<=0){ showToast('Enter a valid name and amount'); return; }
 
   const btn = document.getElementById('add-btn');
   btn.disabled = true;
   btn.textContent = 'Saving…';
 
-  const expense = { id: uid(), name, amount, datePaid, cat, type, month: S.cur, driveUrl: '' };
+  const expense = { id: uid(), name, amount, datePaid, cat, type, month: S.cur, driveUrl: billUrl };
 
   try {
-    // Upload file to Drive first if there is one
-    if(selectedFile){
-      showToast('Uploading bill…');
-      const driveRes = await uploadToDrive(selectedFile, expense.id);
-      if(driveRes.url) expense.driveUrl = driveRes.url;
-    }
-
-    // Save to Sheets
     await saveToSheets(expense);
     currentExpenses.push(expense);
 
@@ -910,11 +928,7 @@ async function addExp(){
     document.getElementById('e-name').value='';
     document.getElementById('e-amt').value='';
     document.getElementById('e-date').value='';
-    selectedFile = null;
-    document.getElementById('e-file').value='';
-    const label = document.getElementById('upload-label');
-    label.innerHTML = '📎 Attach bill<input type="file" id="e-file" accept=".pdf,image/*" style="display:none" onchange="handleFileSelect(this)">';
-    label.classList.remove('has-file');
+    document.getElementById('e-bill-url').value='';
 
     renderDash(); renderExpenses();
     showToast('Expense saved ✓');
@@ -1418,7 +1432,7 @@ function buildContext(){
   const totalSavMonthly = SAV_ACCOUNTS.reduce((a,ac)=>a+(savData[ac.id].monthly||0),0);
   const savSummary = SAV_ACCOUNTS.map(ac=>`${ac.name} (${savData[ac.id].provider||'Harel'}): ₪${savData[ac.id].balance} balance, ₪${savData[ac.id].monthly}/mo direct debit`).join(' | ');
 
-  return `You are a personal finance advisor for Yitsy, living in Rishon LeZion, Israel. Be warm, concise, and specific with ₪ amounts.
+  return `You are a personal finance advisor for the family, living in Rishon LeZion, Israel. Be warm, concise, and specific with ₪ amounts.
 
 BILLING SETUP:
 - Salary is paid monthly. Monthly income: ₪${S.salary}
@@ -1511,10 +1525,10 @@ async function init(){
   setTimeout(()=>{
     const {m}=parseKey(S.cur);
     if(!document.getElementById('q-msgs').hasChildNodes()){
-      addMsg('q-msgs','assistant',`שלום Yitsy! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — CC charges out on 10th ${MF[m]}.\n\nAsk me anything!`);
+      addMsg('q-msgs','assistant',`שלום! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — CC charges out on 10th ${MF[m]}.\n\nAsk me anything!`);
     }
     if(!document.getElementById('f-msgs').hasChildNodes()){
-      addMsg('f-msgs','assistant',`שלום Yitsy! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• CC charged every 10th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
+      addMsg('f-msgs','assistant',`שלום! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• CC charged every 10th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
     }
   },500);
 }
