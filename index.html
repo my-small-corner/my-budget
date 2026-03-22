@@ -97,7 +97,7 @@
   .stat-card.rate .stat-value { color: var(--yellow); }
   .stat-sub { font-size: 11.5px; color: var(--text-dim); margin-top: 5px; }
 
-  .content-grid { display: grid; grid-template-columns: 1fr 360px; gap: 22px; }
+  .content-grid { display: grid; grid-template-columns: 1fr 320px; gap: 22px; }
 
   /* PANELS */
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
@@ -108,12 +108,12 @@
 
   /* EXPENSE ROWS */
   .expense-list { display: flex; flex-direction: column; gap: 2px; }
-  .exp-item { display: grid; grid-template-columns: 32px 1fr 100px auto; align-items: center; gap: 12px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
+  .exp-item { display: grid; grid-template-columns: 32px 1fr 130px 36px; align-items: center; gap: 8px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
   .exp-item:hover { background: var(--surface2); }
   .exp-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--surface3); flex-shrink: 0; }
   .exp-name { font-size: 13.5px; font-weight: 500; }
   .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 5px; align-items: center; margin-top: 1px; flex-wrap: wrap; }
-  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
   .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 4px; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v4.4</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v4.8</div>
   </aside>
 
   <main class="main">
@@ -374,38 +374,14 @@
         <h2>Expenses</h2>
         <p id="exp-sub">—</p>
       </div>
-      <div class="panel">
-        <div class="panel-header">
-          <span class="panel-title" id="exp-panel-title">—</span>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <select class="fsel" id="exp-filter-type" onchange="renderExpenses()" style="height:32px;font-size:12px;">
-              <option value="all">All Types</option>
-              <option value="cc">💳 Credit Card</option>
-              <option value="debit">💰 Debit Card</option>
-              <option value="bank">🏦 Bank Transfer</option>
-              <option value="cash">💵 Cash</option>
-              <option value="cibus">🍱 Cibus</option>
-              <option value="bim">🔄 Bimonthly</option>
-              <option value="reg">📋 Regular</option>
-            </select>
-            <select class="fsel" id="exp-filter-cat" onchange="renderExpenses()" style="height:32px;font-size:12px;">
-              <option value="all">All Categories</option>
-            </select>
-          </div>
-        </div>
-        <div class="sec-label">💳 Credit Card — charged together on the 10th</div>
-        <div class="expense-list" id="list-cc"></div>
-        <div class="sec-label">🔄 Bimonthly Bills — electricity, gas, water, arnona</div>
-        <div class="expense-list" id="list-bim"></div>
-        <div class="sec-label">📋 Regular Monthly — rent, subscriptions, cash</div>
-        <div class="expense-list" id="list-reg"></div>
-        <div class="add-form">
+
+      <!-- ADD FORM AT TOP -->
+      <div class="panel" style="margin-bottom:18px;">
+        <div class="add-form" style="margin-top:0;padding-top:0;border-top:none;">
           <div class="fg"><label>Name</label><input class="fi nm" id="e-name" placeholder="Expense name…"></div>
           <div class="fg"><label>Amount ₪</label><input class="fi am" id="e-amt" type="text" inputmode="numeric" placeholder="0" onblur="liveFormat(this)"></div>
           <div class="fg"><label>Date Paid</label><input class="fi dt" id="e-date" type="date"></div>
-          <div class="fg"><label>Category</label>
-            <select class="fsel" id="e-cat"></select>
-          </div>
+          <div class="fg"><label>Category</label><select class="fsel" id="e-cat"></select></div>
           <div class="fg"><label>Type</label>
             <select class="fsel" id="e-type">
               <option value="cc">💳 Credit Card</option>
@@ -418,11 +394,33 @@
             </select>
           </div>
           <div class="fg"><label>Bill URL (optional)</label>
-            <input class="fi" id="e-bill-url" type="text" placeholder="Paste Google Drive link…" style="width:180px;">
+            <input class="fi" id="e-bill-url" type="text" placeholder="Paste Google Drive link…" style="width:160px;">
           </div>
           <button class="btn-add" id="add-btn" onclick="addExp()">+ Add</button>
         </div>
       </div>
+
+      <!-- FILTERS -->
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--text-muted);">Filter:</span>
+        <select class="fsel" id="exp-filter-type" onchange="renderExpenses()" style="height:32px;font-size:12px;">
+          <option value="all">All Types</option>
+          <option value="cc">💳 Credit Card</option>
+          <option value="debit">💰 Debit Card</option>
+          <option value="bank">🏦 Bank Transfer</option>
+          <option value="cash">💵 Cash</option>
+          <option value="cibus">🍱 Cibus</option>
+          <option value="bim">🔄 Bimonthly</option>
+          <option value="reg">📋 Regular</option>
+        </select>
+        <select class="fsel" id="exp-filter-cat" onchange="renderExpenses()" style="height:32px;font-size:12px;">
+          <option value="all">All Categories</option>
+        </select>
+        <span id="exp-total-label" style="margin-left:auto;font-size:13px;color:var(--text-muted);"></span>
+      </div>
+
+      <!-- TYPE BOXES -->
+      <div id="exp-type-boxes" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;"></div>
     </div>
 
     <!-- SAVINGS -->
@@ -621,14 +619,18 @@ const APP_PASSWORD = 'yitsy2024'; // ← change this to whatever you want
 // ═══════════════════════════════════════
 const MF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DEFAULT_CATS = ['🏢 Arnona','🚙 Car','💳 Credit Card','🍽 Diners','📚 Education','💡 Electricity','🎬 Entertainment','🛒 Food & Groceries','🔥 Gas','💊 Health','🏠 Housing','🔧 Maintenance','📦 Other','💰 Savings','📱 Subscriptions','🚗 Transport','👗 Clothing','💧 Water','💎 Visa'];
+const DEFAULT_CATS = ['🏢 Arnona','🚙 Car','💳 Credit Card','🥗 Diners','📚 Education','💡 Electricity','🎬 Entertainment','🛒 Food & Groceries','🔥 Gas','💊 Health','🏠 Housing','🔧 Maintenance','📦 Other','💰 Savings','📱 Subscriptions','🚗 Transport','👗 Clothing','💧 Water','💎 Visa'];
 const CCOLS = ['#6ee7b7','#818cf8','#fb923c','#f87171','#fbbf24','#a78bfa','#34d399','#60a5fa','#f472b6','#94a3b8','#2dd4bf','#c084fc','#4ade80','#facc15','#e2e8f0'];
 function getCats(){ 
   try { 
     const c=localStorage.getItem('yitsy_cats'); 
     if(!c) return DEFAULT_CATS;
     const cats = JSON.parse(c);
-    const fixed = cats.map(cat => cat.replace('🏛 Arnona','🏢 Arnona').replace('🏙 Arnona','🏢 Arnona').replace('🏘 Arnona','🏢 Arnona'));
+    const fixed = cats.map(cat => cat
+      .replace('🏛 Arnona','🏢 Arnona')
+      .replace('🏙 Arnona','🏢 Arnona')
+      .replace('🏘 Arnona','🏢 Arnona')
+      .replace('🍽 Diners','🥗 Diners'));
     // Add new default cats if missing
     DEFAULT_CATS.forEach(dc => { if(!fixed.includes(dc)) fixed.push(dc); });
     return fixed;
@@ -826,19 +828,19 @@ function expRow(e){
   const icon = e.cat.split(' ')[0];
   const catName = e.cat.split(' ').slice(1).join(' ');
   const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
-  const datePaid = e.datePaid ? e.datePaid : '—';
-  return `<div class="exp-item">
+  const datePaid = e.datePaid || '—';
+  return `<div class="exp-item" onclick="editExp('${e.id}')" style="cursor:pointer;" title="Click to edit">
     <div class="exp-icon">${icon}</div>
-    <div style="min-width:0;overflow:hidden;">
+    <div style="min-width:0;">
       <div class="exp-name">${e.name}</div>
-      <div style="display:grid;grid-template-columns:120px 120px 90px;gap:4px;align-items:center;margin-top:2px;">
-        <span style="font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${catName}</span>
-        <span>${typeTag(e.type)}</span>
-        <span style="font-size:11px;color:var(--text-dim);">${datePaid}</span>
+      <div style="display:flex;align-items:center;gap:0;margin-top:3px;">
+        <span style="font-size:11px;color:var(--text-dim);width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;">${catName}</span>
+        <span style="width:110px;flex-shrink:0;">${typeTag(e.type)}</span>
+        <span style="font-size:11px;color:var(--text-dim);flex-shrink:0;">${datePaid}</span>
       </div>
     </div>
     <div class="exp-amount">${fmt(e.amount)}</div>
-    <div class="exp-controls">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div>
+    <div class="exp-controls" onclick="event.stopPropagation()">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div>
   </div>`;
 }
 
@@ -896,32 +898,60 @@ function renderDash(){
 function renderExpenses(){
   const {m} = parseKey(S.cur);
   document.getElementById('exp-sub').textContent = `${monthLabel(S.cur)} · CC charged 10th ${MF[m]}`;
-  document.getElementById('exp-panel-title').textContent = monthLabel(S.cur);
-
-  // Populate category filter
-  const catFilter = document.getElementById('exp-filter-cat');
-  const currentCatFilter = catFilter ? catFilter.value : 'all';
-  if(catFilter){
-    const cats = [...new Set(currentExpenses.map(e=>e.cat))].sort();
-    catFilter.innerHTML = '<option value="all">All Categories</option>' +
-      cats.map(c=>`<option value="${c}" ${c===currentCatFilter?'selected':''}>${c}</option>`).join('');
-  }
 
   const typeFilter = document.getElementById('exp-filter-type')?.value || 'all';
-  const catVal = currentCatFilter;
+  const catFilter = document.getElementById('exp-filter-cat')?.value || 'all';
 
+  // Populate category filter
+  const catFilterEl = document.getElementById('exp-filter-cat');
+  if(catFilterEl){
+    const usedCats = [...new Set(currentExpenses.map(e=>e.cat))].sort();
+    catFilterEl.innerHTML = '<option value="all">All Categories</option>' +
+      usedCats.map(c=>`<option value="${c}" ${c===catFilter?'selected':''}>${c}</option>`).join('');
+  }
+
+  // Filter expenses
   let es = currentExpenses;
-  if(catVal !== 'all') es = es.filter(e=>e.cat===catVal);
+  if(catFilter !== 'all') es = es.filter(e=>e.cat===catFilter);
+  if(typeFilter !== 'all') es = es.filter(e=>e.type===typeFilter);
 
-  const r=(list,id)=>{
-    const filtered = typeFilter === 'all' ? list : list.filter(e=>e.type===typeFilter);
-    document.getElementById(id).innerHTML = filtered.length
-      ? [...filtered].sort((a,b)=>b.amount-a.amount).map(expRow).join('')
-      : '<div style="padding:8px 10px;color:var(--text-dim);font-size:13px;">None this month</div>';
-  };
-  r(es.filter(e=>e.type==='cc'), 'list-cc');
-  r(es.filter(e=>e.type==='bim'), 'list-bim');
-  r(es.filter(e=>!['cc','bim'].includes(e.type)), 'list-reg');
+  // Update total label
+  const total = es.reduce((a,e)=>a+e.amount,0);
+  const totalEl = document.getElementById('exp-total-label');
+  if(totalEl) totalEl.textContent = `Total: ${fmt(total)} · ${es.length} items`;
+
+  // Define type groups
+  const TYPE_GROUPS = [
+    {key:'cc',    label:'💳 Credit Card',   note:'charged 10th'},
+    {key:'debit', label:'💰 Debit Card',    note:''},
+    {key:'bank',  label:'🏦 Bank Transfer', note:''},
+    {key:'cash',  label:'💵 Cash',          note:''},
+    {key:'cibus', label:'🍱 Cibus',         note:''},
+    {key:'bim',   label:'🔄 Bimonthly',     note:'skips next month'},
+    {key:'reg',   label:'📋 Regular',       note:''},
+  ];
+
+  const boxes = document.getElementById('exp-type-boxes');
+  if(!boxes) return;
+
+  const html = TYPE_GROUPS.map(g => {
+    const items = es.filter(e=>e.type===g.key);
+    if(!items.length) return '';
+    const groupTotal = items.reduce((a,e)=>a+e.amount,0);
+    const rows = [...items].sort((a,b)=>b.amount-a.amount).map(expRow).join('');
+    return `<div class="panel" style="break-inside:avoid;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${g.label}</div>
+          ${g.note?`<div style="font-size:11px;color:var(--text-dim);">${g.note}</div>`:''}
+        </div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--red);">${fmt(groupTotal)}</div>
+      </div>
+      <div class="expense-list">${rows}</div>
+    </div>`;
+  }).join('');
+
+  boxes.innerHTML = html || '<div class="empty"><div class="ico">💸</div><p>No expenses match the filter</p></div>';
 }
 
 // ═══════════════════════════════════════
@@ -986,6 +1016,49 @@ async function addExp(){
 
   btn.disabled = false;
   btn.textContent = '+ Add';
+}
+
+function editExp(id){
+  const e = currentExpenses.find(x=>x.id===id);
+  if(!e) return;
+  const cats = getCats().slice().sort((a,b)=>a.localeCompare(b));
+  const catOptions = cats.map(c=>`<option value="${c}" ${c===e.cat?'selected':''}>${c}</option>`).join('');
+  const typeOptions = [
+    ['cc','💳 Credit Card'],['debit','💰 Debit Card'],['bank','🏦 Bank Transfer'],
+    ['cash','💵 Cash'],['cibus','🍱 Cibus'],['bim','🔄 Bimonthly'],['reg','📋 Regular']
+  ].map(([v,l])=>`<option value="${v}" ${v===e.type?'selected':''}>${l}</option>`).join('');
+
+  // Replace the row with an edit form
+  const rows = document.querySelectorAll('.exp-item');
+  rows.forEach(row => {
+    if(row.getAttribute('onclick')?.includes(id)){
+      row.outerHTML = `<div class="exp-item" style="background:var(--surface2);border:1px solid var(--accent2);border-radius:var(--radius-sm);padding:12px;flex-wrap:wrap;display:flex;gap:8px;align-items:center;">
+        <input class="fi" id="edit-name-${id}" value="${e.name}" style="width:130px;height:30px;font-size:12px;">
+        <input class="fi" id="edit-amt-${id}" value="${e.amount}" style="width:80px;height:30px;font-size:12px;" onblur="liveFormat(this)">
+        <input class="fi" id="edit-date-${id}" type="date" value="${e.datePaid||''}" style="width:130px;height:30px;font-size:12px;">
+        <select class="fsel" id="edit-cat-${id}" style="height:30px;font-size:12px;">${catOptions}</select>
+        <select class="fsel" id="edit-type-${id}" style="height:30px;font-size:12px;">${typeOptions}</select>
+        <button onclick="saveEditExp('${id}')" style="background:var(--accent);color:#0d0f14;border:none;border-radius:var(--radius-sm);padding:0 12px;height:30px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;">Save</button>
+        <button onclick="renderDash();renderExpenses();" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:0 10px;height:30px;font-family:inherit;font-size:12px;color:var(--text-muted);cursor:pointer;">Cancel</button>
+      </div>`;
+    }
+  });
+}
+
+async function saveEditExp(id){
+  const e = currentExpenses.find(x=>x.id===id);
+  if(!e) return;
+  e.name = document.getElementById(`edit-name-${id}`).value.trim() || e.name;
+  e.amount = parseInput(document.getElementById(`edit-amt-${id}`).value) || e.amount;
+  e.datePaid = document.getElementById(`edit-date-${id}`).value || e.datePaid;
+  e.cat = document.getElementById(`edit-cat-${id}`).value || e.cat;
+  e.type = document.getElementById(`edit-type-${id}`).value || e.type;
+  try {
+    await deleteFromSheets(id);
+    await saveToSheets(e);
+    renderDash(); renderExpenses();
+    showToast('Updated ✓');
+  } catch(err){ showToast('Error updating'); }
 }
 
 async function delExp(id){
