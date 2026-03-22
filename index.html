@@ -108,13 +108,13 @@
 
   /* EXPENSE ROWS */
   .expense-list { display: flex; flex-direction: column; gap: 2px; }
-  .exp-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; width: 100%; }
+  .exp-item { display: grid; grid-template-columns: 32px minmax(0,1fr) 100px 36px; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
   .exp-item:hover { background: var(--surface2); }
   .exp-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--surface3); flex-shrink: 0; }
   .exp-name { font-size: 13.5px; font-weight: 500; }
-  .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 5px; align-items: center; margin-top: 1px; flex-wrap: nowrap; }
-  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; margin-left: auto; padding-left: 12px; flex-shrink: 0; min-width: 90px; }
-  .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+  .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 6px; align-items: center; margin-top: 2px; overflow: hidden; }
+  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; justify-content: flex-end; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
   .btn-icon.del:hover { color: var(--red); background: var(--surface3); }
@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.0</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.1</div>
   </aside>
 
   <main class="main">
@@ -827,17 +827,13 @@ function typeTag(t){
 function expRow(e){
   const icon = e.cat.split(' ')[0];
   const catName = e.cat.split(' ').slice(1).join(' ');
-  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
+  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
   const datePaid = e.datePaid || '—';
   return `<div class="exp-item" onclick="editExp('${e.id}')" style="cursor:pointer;" title="Click to edit">
     <div class="exp-icon">${icon}</div>
-    <div style="min-width:0;flex:1;">
+    <div style="min-width:0;">
       <div class="exp-name">${e.name}</div>
-      <div class="exp-meta">
-        <span style="min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${catName}</span>
-        <span style="min-width:100px;">${typeTag(e.type)}</span>
-        <span style="white-space:nowrap;">${datePaid}</span>
-      </div>
+      <div class="exp-meta">${catName} &nbsp;${typeTag(e.type)}&nbsp; ${datePaid}</div>
     </div>
     <div class="exp-amount">${fmt(e.amount)}</div>
     <div class="exp-controls" onclick="event.stopPropagation()">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div>
