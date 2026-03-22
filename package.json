@@ -2,7 +2,6 @@
   "name": "my-budget",
   "version": "1.0.0",
   "dependencies": {
-    "googleapis": "^140.0.0",
-    "formidable": "^3.5.1"
+    "googleapis": "^140.0.0"
   }
 }
