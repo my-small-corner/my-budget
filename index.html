@@ -107,13 +107,16 @@
   .panel-action:hover { text-decoration: underline; }
 
   /* EXPENSE ROWS */
-  .expense-list { display: flex; flex-direction: column; gap: 2px; }
-  .exp-item { display: grid; grid-template-columns: 32px minmax(0,1fr) 120px 30px; align-items: center; gap: 10px; padding: 9px 0; border-radius: var(--radius-sm); transition: background 0.12s; }
-  .exp-item:hover { background: var(--surface2); padding: 9px 8px; }
-  .exp-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--surface3); flex-shrink: 0; }
-  .exp-name { font-size: 13.5px; font-weight: 500; }
-  .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 6px; align-items: center; margin-top: 2px; }
-  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; padding-right: 8px; }
+  .expense-list { width: 100%; border-collapse: collapse; display: table; }
+  .exp-item { display: table-row; cursor: pointer; }
+  .exp-item:hover td, .exp-item:hover > div { background: var(--surface2); }
+  .exp-item > div { display: table-cell; padding: 8px 6px; vertical-align: middle; border-bottom: 1px solid var(--border); }
+  .exp-icon-cell { width: 36px; }
+  .exp-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--surface3); }
+  .exp-name { font-size: 13px; font-weight: 500; }
+  .exp-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .exp-amount-cell { width: 110px; text-align: right; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--red); font-variant-numeric: tabular-nums; padding-right: 8px; }
+  .exp-controls-cell { width: 30px; text-align: right; }
   .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; justify-content: flex-end; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
@@ -321,7 +324,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.3</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.4</div>
   </aside>
 
   <main class="main">
@@ -829,14 +832,14 @@ function expRow(e){
   const catName = e.cat.split(' ').slice(1).join(' ');
   const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
   const datePaid = e.datePaid || '—';
-  return `<div class="exp-item" onclick="editExp('${e.id}')" style="cursor:pointer;" title="Click to edit">
-    <div class="exp-icon">${icon}</div>
-    <div style="min-width:0;">
+  return `<div class="exp-item" onclick="editExp('${e.id}')" title="Click to edit">
+    <div class="exp-icon-cell"><div class="exp-icon">${icon}</div></div>
+    <div>
       <div class="exp-name">${e.name}</div>
       <div class="exp-meta">${catName} &nbsp;${typeTag(e.type)}&nbsp; ${datePaid}</div>
     </div>
-    <div class="exp-amount">${fmt(e.amount)}</div>
-    <div class="exp-controls" onclick="event.stopPropagation()">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div>
+    <div class="exp-amount-cell">${fmt(e.amount)}</div>
+    <div class="exp-controls-cell"><div class="exp-controls" onclick="event.stopPropagation()">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div></div>
   </div>`;
 }
 
@@ -1253,6 +1256,9 @@ function renderApplyMonth(){
 
 async function applyRecurring(){
   if(!S.recurring.length){ showToast('No recurring expenses set up'); return; }
+  // Reload from sheets first to get latest data
+  showToast('Checking for duplicates…');
+  await loadExpenses();
   const today = new Date();
   const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   let added = 0;
