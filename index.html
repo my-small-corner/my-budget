@@ -108,13 +108,13 @@
 
   /* EXPENSE ROWS */
   .expense-list { display: flex; flex-direction: column; gap: 2px; }
-  .exp-item { display: grid; grid-template-columns: 32px 1fr 130px 36px; align-items: center; gap: 8px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
+  .exp-item { display: grid; grid-template-columns: 32px 1fr 140px 52px; align-items: center; gap: 8px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
   .exp-item:hover { background: var(--surface2); }
   .exp-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--surface3); flex-shrink: 0; }
   .exp-name { font-size: 13.5px; font-weight: 500; }
   .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 5px; align-items: center; margin-top: 1px; flex-wrap: wrap; }
-  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.3px; }
-  .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 4px; }
+  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; justify-content: flex-end; align-items: center; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
   .btn-icon.del:hover { color: var(--red); background: var(--surface3); }
@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v4.8</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v4.9</div>
   </aside>
 
   <main class="main">
