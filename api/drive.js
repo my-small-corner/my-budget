@@ -1,8 +1,4 @@
-import { google } = require('googleapis');
-import formidable from 'formidable';
-import fs from 'fs';
-
-export const config = { api: { bodyParser: false } };
+const { google } = require('googleapis');
 
 const DRIVE_FOLDER_NAME = 'Yitsy Budget Bills';
 
@@ -27,24 +23,39 @@ async function getOrCreateFolder(drive) {
   return folder.data.id;
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const form = formidable({ multiples: false });
-    const [fields, files] = await form.parse(req);
-    const file = Array.isArray(files.file) ? files.file[0] : files.file;
-    const expenseId = Array.isArray(fields.expenseId) ? fields.expenseId[0] : fields.expenseId;
+    // Parse multipart manually
+    const contentType = req.headers['content-type'] || '';
+    const boundary = contentType.split('boundary=')[1];
+    if (!boundary) return res.status(400).json({ error: 'No boundary' });
+
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const body = Buffer.concat(chunks);
+
+    const parts = parseMultipart(body, boundary);
+    const filePart = parts.find(p => p.name === 'file');
+    const expenseIdPart = parts.find(p => p.name === 'expenseId');
+
+    if (!filePart) return res.status(400).json({ error: 'No file' });
 
     const auth = getAuth();
     const drive = google.drive({ version: 'v3', auth });
     const folderId = await getOrCreateFolder(drive);
 
+    const { Readable } = require('stream');
+    const stream = Readable.from(filePart.data);
+    const fileName = `${expenseIdPart?.value || Date.now()}_${filePart.filename}`;
+
     const uploadRes = await drive.files.create({
-      requestBody: { name: `${expenseId}_${file.originalFilename}`, parents: [folderId] },
-      media: { mimeType: file.mimetype, body: fs.createReadStream(file.filepath) },
+      requestBody: { name: fileName, parents: [folderId] },
+      media: { mimeType: filePart.contentType || 'application/octet-stream', body: stream },
       fields: 'id, webViewLink',
     });
 
@@ -58,4 +69,36 @@ export default async function handler(req, res) {
     console.error(err);
     return res.status(500).json({ error: err.message });
   }
+};
+
+function parseMultipart(buffer, boundary) {
+  const parts = [];
+  const boundaryBuffer = Buffer.from('--' + boundary);
+  let start = 0;
+  while (start < buffer.length) {
+    const boundaryIndex = buffer.indexOf(boundaryBuffer, start);
+    if (boundaryIndex === -1) break;
+    const headerStart = boundaryIndex + boundaryBuffer.length + 2;
+    const headerEnd = buffer.indexOf(Buffer.from('\r\n\r\n'), headerStart);
+    if (headerEnd === -1) break;
+    const headerStr = buffer.slice(headerStart, headerEnd).toString();
+    const dataStart = headerEnd + 4;
+    const nextBoundary = buffer.indexOf(boundaryBuffer, dataStart);
+    const dataEnd = nextBoundary === -1 ? buffer.length : nextBoundary - 2;
+    const data = buffer.slice(dataStart, dataEnd);
+    const nameMatch = headerStr.match(/name="([^"]+)"/);
+    const filenameMatch = headerStr.match(/filename="([^"]+)"/);
+    const contentTypeMatch = headerStr.match(/Content-Type: ([^\r\n]+)/);
+    if (nameMatch) {
+      parts.push({
+        name: nameMatch[1],
+        filename: filenameMatch ? filenameMatch[1] : null,
+        contentType: contentTypeMatch ? contentTypeMatch[1] : null,
+        data,
+        value: filenameMatch ? null : data.toString(),
+      });
+    }
+    start = nextBoundary === -1 ? buffer.length : nextBoundary;
+  }
+  return parts;
 }
