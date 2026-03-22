@@ -108,12 +108,12 @@
 
   /* EXPENSE ROWS */
   .expense-list { display: flex; flex-direction: column; gap: 2px; }
-  .exp-item { display: grid; grid-template-columns: 32px 1fr auto auto; align-items: center; gap: 12px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
+  .exp-item { display: grid; grid-template-columns: 32px 1fr 100px auto; align-items: center; gap: 12px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; }
   .exp-item:hover { background: var(--surface2); }
   .exp-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--surface3); flex-shrink: 0; }
   .exp-name { font-size: 13.5px; font-weight: 500; }
   .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 5px; align-items: center; margin-top: 1px; flex-wrap: wrap; }
-  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; }
+  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
   .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 4px; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
@@ -124,7 +124,7 @@
   /* TAGS */
   .tag { display: inline-flex; align-items: center; padding: 1px 7px; border-radius: 99px; font-size: 10px; font-weight: 500; white-space: nowrap; }
   .tag.cc { background: rgba(129,140,248,0.13); color: var(--accent2); }
-  .tag.bank { background: rgba(96,165,250,0.13); color: #60a5fa; }
+  .tag.cibus { background: rgba(251,146,60,0.13); color: #fb923c; }
   .tag.bim { background: rgba(251,191,36,0.13); color: var(--yellow); }
   .tag.reg { background: rgba(110,231,183,0.1); color: var(--accent); }
   .tag.has-bill { background: rgba(129,140,248,0.1); color: var(--accent2); font-size: 10px; }
@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.9</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v4.4</div>
   </aside>
 
   <main class="main">
@@ -375,7 +375,24 @@
         <p id="exp-sub">—</p>
       </div>
       <div class="panel">
-        <div class="panel-header"><span class="panel-title" id="exp-panel-title">—</span></div>
+        <div class="panel-header">
+          <span class="panel-title" id="exp-panel-title">—</span>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="fsel" id="exp-filter-type" onchange="renderExpenses()" style="height:32px;font-size:12px;">
+              <option value="all">All Types</option>
+              <option value="cc">💳 Credit Card</option>
+              <option value="debit">💰 Debit Card</option>
+              <option value="bank">🏦 Bank Transfer</option>
+              <option value="cash">💵 Cash</option>
+              <option value="cibus">🍱 Cibus</option>
+              <option value="bim">🔄 Bimonthly</option>
+              <option value="reg">📋 Regular</option>
+            </select>
+            <select class="fsel" id="exp-filter-cat" onchange="renderExpenses()" style="height:32px;font-size:12px;">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+        </div>
         <div class="sec-label">💳 Credit Card — charged together on the 10th</div>
         <div class="expense-list" id="list-cc"></div>
         <div class="sec-label">🔄 Bimonthly Bills — electricity, gas, water, arnona</div>
@@ -394,6 +411,8 @@
               <option value="cc">💳 Credit Card</option>
               <option value="debit">💰 Debit Card</option>
               <option value="bank">🏦 Bank Transfer</option>
+              <option value="cash">💵 Cash</option>
+              <option value="cibus">🍱 Cibus</option>
               <option value="bim">🔄 Bimonthly Bill</option>
               <option value="reg">📋 Regular / Monthly</option>
             </select>
@@ -453,6 +472,8 @@
               <option value="cc">💳 Credit Card</option>
               <option value="debit">💰 Debit Card</option>
               <option value="bank">🏦 Bank Transfer</option>
+              <option value="cash">💵 Cash</option>
+              <option value="cibus">🍱 Cibus</option>
               <option value="bim">🔄 Bimonthly</option>
               <option value="reg">📋 Regular</option>
             </select>
@@ -600,15 +621,16 @@ const APP_PASSWORD = 'yitsy2024'; // ← change this to whatever you want
 // ═══════════════════════════════════════
 const MF = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const MS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const DEFAULT_CATS = ['🏠 Housing','🛒 Food & Groceries','🚗 Transport','💊 Health','🎬 Entertainment','👗 Clothing','📱 Subscriptions','📚 Education','💡 Electricity','🔥 Gas','💧 Water','🏢 Arnona','🔧 Maintenance','💰 Savings','📦 Other'];
+const DEFAULT_CATS = ['🏢 Arnona','🚙 Car','💳 Credit Card','🍽 Diners','📚 Education','💡 Electricity','🎬 Entertainment','🛒 Food & Groceries','🔥 Gas','💊 Health','🏠 Housing','🔧 Maintenance','📦 Other','💰 Savings','📱 Subscriptions','🚗 Transport','👗 Clothing','💧 Water','💎 Visa'];
 const CCOLS = ['#6ee7b7','#818cf8','#fb923c','#f87171','#fbbf24','#a78bfa','#34d399','#60a5fa','#f472b6','#94a3b8','#2dd4bf','#c084fc','#4ade80','#facc15','#e2e8f0'];
 function getCats(){ 
   try { 
     const c=localStorage.getItem('yitsy_cats'); 
     if(!c) return DEFAULT_CATS;
-    // Fix old Arnona emojis
     const cats = JSON.parse(c);
     const fixed = cats.map(cat => cat.replace('🏛 Arnona','🏢 Arnona').replace('🏙 Arnona','🏢 Arnona').replace('🏘 Arnona','🏢 Arnona'));
+    // Add new default cats if missing
+    DEFAULT_CATS.forEach(dc => { if(!fixed.includes(dc)) fixed.push(dc); });
     return fixed;
   } 
   catch(e){ return DEFAULT_CATS; } 
@@ -794,6 +816,8 @@ function typeTag(t){
   if(t==='cc')    return '<span class="tag cc">💳 Credit Card</span>';
   if(t==='debit') return '<span class="tag debit">💰 Debit Card</span>';
   if(t==='bank')  return '<span class="tag bank">🏦 Bank Transfer</span>';
+  if(t==='cash')  return '<span class="tag cash">💵 Cash</span>';
+  if(t==='cibus') return '<span class="tag cibus">🍱 Cibus</span>';
   if(t==='bim')   return '<span class="tag bim">🔄 Bimonthly</span>';
   return '<span class="tag reg">📋 Monthly</span>';
 }
@@ -802,10 +826,17 @@ function expRow(e){
   const icon = e.cat.split(' ')[0];
   const catName = e.cat.split(' ').slice(1).join(' ');
   const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
-  const datePaid = e.datePaid ? `<span>${e.datePaid}</span>` : '';
+  const datePaid = e.datePaid ? e.datePaid : '—';
   return `<div class="exp-item">
     <div class="exp-icon">${icon}</div>
-    <div><div class="exp-name">${e.name}</div><div class="exp-meta">${catName} ${typeTag(e.type)} ${datePaid}</div></div>
+    <div style="min-width:0;overflow:hidden;">
+      <div class="exp-name">${e.name}</div>
+      <div style="display:grid;grid-template-columns:120px 120px 90px;gap:4px;align-items:center;margin-top:2px;">
+        <span style="font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${catName}</span>
+        <span>${typeTag(e.type)}</span>
+        <span style="font-size:11px;color:var(--text-dim);">${datePaid}</span>
+      </div>
+    </div>
     <div class="exp-amount">${fmt(e.amount)}</div>
     <div class="exp-controls">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div>
   </div>`;
@@ -837,7 +868,7 @@ function renderDash(){
   document.getElementById('s-expenses').textContent = fmt(total);
   document.getElementById('s-count').textContent = es.length+' item'+(es.length!==1?'s':'');
   document.getElementById('s-remaining').textContent = fmt(rem);
-  document.getElementById('s-rem-lbl').textContent = rem<0 ? '⚠ Over budget!' : 'Remaining';
+  document.getElementById('s-rem-lbl').textContent = rem<0 ? '⚠ Over budget!' : `${fmt(income)} - ${fmt(total)}`;
   document.getElementById('s-bank').textContent = fmt(S.bankBalance);
 
   const dl = document.getElementById('dash-list');
@@ -866,15 +897,31 @@ function renderExpenses(){
   const {m} = parseKey(S.cur);
   document.getElementById('exp-sub').textContent = `${monthLabel(S.cur)} · CC charged 10th ${MF[m]}`;
   document.getElementById('exp-panel-title').textContent = monthLabel(S.cur);
-  const es = currentExpenses;
+
+  // Populate category filter
+  const catFilter = document.getElementById('exp-filter-cat');
+  const currentCatFilter = catFilter ? catFilter.value : 'all';
+  if(catFilter){
+    const cats = [...new Set(currentExpenses.map(e=>e.cat))].sort();
+    catFilter.innerHTML = '<option value="all">All Categories</option>' +
+      cats.map(c=>`<option value="${c}" ${c===currentCatFilter?'selected':''}>${c}</option>`).join('');
+  }
+
+  const typeFilter = document.getElementById('exp-filter-type')?.value || 'all';
+  const catVal = currentCatFilter;
+
+  let es = currentExpenses;
+  if(catVal !== 'all') es = es.filter(e=>e.cat===catVal);
+
   const r=(list,id)=>{
-    document.getElementById(id).innerHTML = list.length
-      ? [...list].sort((a,b)=>b.amount-a.amount).map(expRow).join('')
+    const filtered = typeFilter === 'all' ? list : list.filter(e=>e.type===typeFilter);
+    document.getElementById(id).innerHTML = filtered.length
+      ? [...filtered].sort((a,b)=>b.amount-a.amount).map(expRow).join('')
       : '<div style="padding:8px 10px;color:var(--text-dim);font-size:13px;">None this month</div>';
   };
   r(es.filter(e=>e.type==='cc'), 'list-cc');
   r(es.filter(e=>e.type==='bim'), 'list-bim');
-  r(es.filter(e=>e.type==='reg'), 'list-reg');
+  r(es.filter(e=>!['cc','bim'].includes(e.type)), 'list-reg');
 }
 
 // ═══════════════════════════════════════
@@ -1318,8 +1365,8 @@ function renderSettings(){
   document.getElementById('bank-inp').value = fmtInput(S.bankBalance);
   // Populate category name datalist
   const dl = document.getElementById('existing-cats');
-  if(dl) dl.innerHTML = getCats().map(c=>`<option value="${c.split(' ').slice(1).join(' ')}">`).join('');
-  const cats = getCats();
+  if(dl) dl.innerHTML = getCats().slice().sort((a,b)=>a.localeCompare(b)).map(c=>`<option value="${c.split(' ').slice(1).join(' ')}">`).join('');
+  const cats = getCats().slice().sort((a,b)=>a.localeCompare(b));
   document.getElementById('cat-lims').innerHTML = `
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
       ${cats.map(c=>`
@@ -1394,7 +1441,7 @@ function deleteCategory(cat){
 
 
 function rebuildDropdowns(){
-  const cats = getCats();
+  const cats = getCats().slice().sort((a,b)=>a.split(' ').slice(1).join(' ').localeCompare(b.split(' ').slice(1).join(' ')));
   const options = cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   const eCat = document.getElementById('e-cat');
   const rCat = document.getElementById('r-cat');
