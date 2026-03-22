@@ -116,7 +116,7 @@
   .exp-name { font-size: 13px; font-weight: 500; }
   .exp-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
   .exp-amount-cell { width: 110px; text-align: right; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--red); font-variant-numeric: tabular-nums; padding-right: 8px; }
-  .exp-controls-cell { width: 30px; text-align: right; }
+  .exp-controls-cell { width: 56px; text-align: right; }
   .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; justify-content: flex-end; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
@@ -324,7 +324,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.4</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.5</div>
   </aside>
 
   <main class="main">
@@ -347,7 +347,7 @@
         <div style="display:flex;flex-direction:column;gap:18px;">
           <div class="panel">
             <div class="panel-header"><span class="panel-title">This Month's Expenses</span><button class="panel-action" onclick="showView('expenses')">+ Add expense</button></div>
-            <div id="dash-list"><div class="loading"><div class="spinner"></div> Loading expenses…</div></div>
+            <div class="expense-list" id="dash-list"><div class="loading"><div class="spinner"></div> Loading expenses…</div></div>
           </div>
           <div class="panel" style="flex:1;">
             <div class="panel-header"><span class="panel-title">Category Breakdown</span></div>
@@ -830,16 +830,16 @@ function typeTag(t){
 function expRow(e){
   const icon = e.cat.split(' ')[0];
   const catName = e.cat.split(' ').slice(1).join(' ');
-  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
+  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent2);text-decoration:none;">📄</a>` : '';
   const datePaid = e.datePaid || '—';
   return `<div class="exp-item" onclick="editExp('${e.id}')" title="Click to edit">
     <div class="exp-icon-cell"><div class="exp-icon">${icon}</div></div>
     <div>
       <div class="exp-name">${e.name}</div>
-      <div class="exp-meta">${catName} &nbsp;${typeTag(e.type)}&nbsp; ${datePaid}</div>
+      <div class="exp-meta">${catName} &nbsp;${typeTag(e.type)}&nbsp; ${datePaid} ${billBtn}</div>
     </div>
     <div class="exp-amount-cell">${fmt(e.amount)}</div>
-    <div class="exp-controls-cell"><div class="exp-controls" onclick="event.stopPropagation()">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div></div>
+    <div class="exp-controls-cell"><div class="exp-controls" onclick="event.stopPropagation()"><button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div></div>
   </div>`;
 }
 
