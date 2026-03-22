@@ -1,4 +1,5 @@
 const { google } = require('googleapis');
+const { Readable } = require('stream');
 
 const DRIVE_FOLDER_NAME = 'Yitsy Budget Bills';
 
@@ -30,7 +31,6 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // Parse multipart manually
     const contentType = req.headers['content-type'] || '';
     const boundary = contentType.split('boundary=')[1];
     if (!boundary) return res.status(400).json({ error: 'No boundary' });
@@ -49,7 +49,6 @@ module.exports = async function handler(req, res) {
     const drive = google.drive({ version: 'v3', auth });
     const folderId = await getOrCreateFolder(drive);
 
-    const { Readable } = require('stream');
     const stream = Readable.from(filePart.data);
     const fileName = `${expenseIdPart?.value || Date.now()}_${filePart.filename}`;
 
