@@ -321,7 +321,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.6</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v3.7</div>
   </aside>
 
   <main class="main">
@@ -718,14 +718,14 @@ function changeMonth(d){
 // ═══════════════════════════════════════
 async function fetchFromSheets(month){
   try {
-    const res = await fetch(`/.netlify/functions/sheets?action=get&month=${month}`);
+    const res = await fetch(`/api/sheets?action=get&month=${month}`);
     const data = await res.json();
     return data.expenses || [];
   } catch(e){ console.error(e); return []; }
 }
 
 async function saveToSheets(expense){
-  const res = await fetch('/.netlify/functions/sheets', {
+  const res = await fetch('/api/sheets', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'add', expense})
@@ -734,7 +734,7 @@ async function saveToSheets(expense){
 }
 
 async function deleteFromSheets(id){
-  const res = await fetch('/.netlify/functions/sheets', {
+  const res = await fetch('/api/sheets', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'delete', id})
@@ -746,7 +746,7 @@ async function uploadToDrive(file, expenseId){
   const formData = new FormData();
   formData.append('file', file);
   formData.append('expenseId', expenseId);
-  const res = await fetch('/.netlify/functions/drive', {
+  const res = await fetch('/api/drive', {
     method: 'POST',
     body: formData
   });
@@ -755,7 +755,7 @@ async function uploadToDrive(file, expenseId){
 
 async function fetchAllMonths(){
   try {
-    const res = await fetch('/.netlify/functions/sheets?action=months');
+    const res = await fetch('/api/sheets?action=months');
     const data = await res.json();
     return data.months || [];
   } catch(e){ return []; }
@@ -1444,7 +1444,7 @@ Keep responses under 200 words unless doing a full analysis.`;
 }
 
 async function callAI(msgs){
-  const res = await fetch('/.netlify/functions/ai', {
+  const res = await fetch('/api/ai', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({messages: msgs, context: buildContext()})
