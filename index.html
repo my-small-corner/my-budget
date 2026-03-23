@@ -331,7 +331,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.7</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.8</div>
   </aside>
 
   <main class="main">
@@ -505,11 +505,17 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
         <div class="panel">
           <div class="panel-header"><span class="panel-title">Spending by Category</span></div>
-          <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div id="chart-cat-legend" style="flex:1;min-width:0;"></div>
+            <div style="width:180px;height:180px;flex-shrink:0;"><canvas id="chart-cat"></canvas></div>
+          </div>
         </div>
         <div class="panel">
           <div class="panel-header"><span class="panel-title">Payment Type Breakdown</span></div>
-          <div class="chart-wrap"><canvas id="chart-type"></canvas></div>
+          <div style="display:flex;align-items:center;gap:16px;">
+            <div id="chart-type-legend" style="flex:1;min-width:0;"></div>
+            <div style="width:180px;height:180px;flex-shrink:0;"><canvas id="chart-type"></canvas></div>
+          </div>
         </div>
       </div>
       <div class="panel">
@@ -1296,41 +1302,55 @@ async function applyRecurring(){
 // ═══════════════════════════════════════
 let chartCat=null, chartType=null, chartTrend=null;
 
+function buildLegend(labels, colors, data, containerId){
+  const total = data.reduce((a,b)=>a+b,0);
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = labels.map((l,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
+      <div style="width:10px;height:10px;border-radius:3px;background:${colors[i]};flex-shrink:0;"></div>
+      <div style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l}</div>
+      <div style="font-size:12px;font-weight:600;color:var(--red);white-space:nowrap;font-variant-numeric:tabular-nums;">${fmt(data[i])}</div>
+      <div style="font-size:11px;color:var(--text-dim);width:32px;text-align:right;">${total>0?Math.round(data[i]/total*100):0}%</div>
+    </div>`).join('');
+}
+
 async function renderCharts(){
   document.getElementById('charts-sub').textContent = monthLabel(S.cur);
   const es = currentExpenses;
 
-  // Destroy old charts
   if(chartCat){ chartCat.destroy(); chartCat=null; }
   if(chartType){ chartType.destroy(); chartType=null; }
   if(chartTrend){ chartTrend.destroy(); chartTrend=null; }
 
-  const chartDefaults = {
-    plugins: { legend: { labels: { color: '#7a82a0', font: { family: 'DM Sans', size: 12 } } } },
-    scales: {}
-  };
+  const noLegend = { plugins: { legend: { display: false } } };
 
   // Category donut
   const byCat = {};
   es.forEach(e=>{ byCat[e.cat]=(byCat[e.cat]||0)+e.amount; });
-  const catLabels = Object.keys(byCat);
+  const catLabels = Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a]);
   const catData = catLabels.map(c=>byCat[c]);
-  const catColors = catLabels.map(c=>CCOLS[CATS.indexOf(c)%CCOLS.length]);
-
+  const catColors = catLabels.map((_,i)=>CCOLS[i%CCOLS.length]);
+  buildLegend(catLabels, catColors, catData, 'chart-cat-legend');
   chartCat = new Chart(document.getElementById('chart-cat'), {
     type: 'doughnut',
     data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catColors, borderWidth: 0 }] },
-    options: { ...chartDefaults, cutout: '65%' }
+    options: { ...noLegend, cutout: '65%' }
   });
 
-  // Type breakdown
-  const ccT = es.filter(e=>e.type==='cc').reduce((a,e)=>a+e.amount,0);
-  const bimT = es.filter(e=>e.type==='bim').reduce((a,e)=>a+e.amount,0);
-  const regT = es.filter(e=>e.type==='reg').reduce((a,e)=>a+e.amount,0);
+  // Type breakdown — all types
+  const typeMap = {cc:'💳 Credit Card', debit:'💰 Debit Card', bank:'🏦 Bank Transfer', cash:'💵 Cash', cibus:'🍱 Cibus', bim:'🔄 Bimonthly', reg:'📋 Regular'};
+  const typeColors = {cc:'#818cf8', debit:'#34d399', bank:'#60a5fa', cash:'#22c55e', cibus:'#fb923c', bim:'#fbbf24', reg:'#6ee7b7'};
+  const typeLabels = [], typeData = [], typeColArr = [];
+  Object.entries(typeMap).forEach(([k,l])=>{
+    const t = es.filter(e=>e.type===k).reduce((a,e)=>a+e.amount,0);
+    if(t>0){ typeLabels.push(l); typeData.push(t); typeColArr.push(typeColors[k]); }
+  });
+  buildLegend(typeLabels, typeColArr, typeData, 'chart-type-legend');
   chartType = new Chart(document.getElementById('chart-type'), {
     type: 'doughnut',
-    data: { labels: ['💳 Credit Card','🔄 Bimonthly','📋 Regular'], datasets: [{ data: [ccT,bimT,regT], backgroundColor: ['#818cf8','#fbbf24','#6ee7b7'], borderWidth: 0 }] },
-    options: { ...chartDefaults, cutout: '65%' }
+    data: { labels: typeLabels, datasets: [{ data: typeData, backgroundColor: typeColArr, borderWidth: 0 }] },
+    options: { ...noLegend, cutout: '65%' }
   });
 
   // Trend — last 6 months
