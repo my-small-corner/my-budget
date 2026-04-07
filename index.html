@@ -331,7 +331,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.9</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.0</div>
   </aside>
 
   <main class="main">
@@ -1327,6 +1327,13 @@ async function applyRecurring(){
 }
 
 async function confirmApplyRecurring(){
+  // Read savings amounts BEFORE removing modal
+  const savInputs = {};
+  SAV_ACCOUNTS.forEach(a => {
+    const inp = document.getElementById(`sav-apply-${a.id}`);
+    if(inp) savInputs[a.id] = parseInput(inp.value);
+  });
+
   document.getElementById('apply-modal')?.remove();
 
   // Apply expenses
@@ -1348,14 +1355,11 @@ async function confirmApplyRecurring(){
   // Apply savings contributions
   const savData = getSavings();
   SAV_ACCOUNTS.forEach(a => {
-    const inp = document.getElementById(`sav-apply-${a.id}`);
-    if(!inp) return; // already done this month
-    const amount = parseInput(inp.value);
-    if(amount > 0){
-      savData[a.id].balance = (savData[a.id].balance || 0) + amount;
-      if(!savData[a.id].log) savData[a.id].log = [];
-      savData[a.id].log.push({ month: S.cur, amount, date: dateStr });
-    }
+    const amount = savInputs[a.id];
+    if(!amount || amount <= 0) return; // already done or zero
+    savData[a.id].balance = (savData[a.id].balance || 0) + amount;
+    if(!savData[a.id].log) savData[a.id].log = [];
+    savData[a.id].log.push({ month: S.cur, amount, date: dateStr });
   });
   saveSavings(savData);
 
