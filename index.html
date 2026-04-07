@@ -331,7 +331,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.0</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.1</div>
   </aside>
 
   <main class="main">
@@ -763,6 +763,7 @@ function showView(id){
 function changeMonth(d){
   S.cur = d<0 ? prevKey(S.cur) : nextKey(S.cur);
   saveLocal();
+  showView('dashboard');
   loadExpenses();
 }
 
@@ -1195,12 +1196,16 @@ function renderSavings() {
   if (!allLogs.length) {
     logEl.innerHTML = '<div class="empty"><p>No contributions logged yet. Update an account to log a contribution.</p></div>';
   } else {
-    logEl.innerHTML = allLogs.slice(0, 20).map(l => `
-      <div class="savings-history-row">
-        <span>${l.account}</span>
-        <span style="color:var(--text-muted);font-size:12px;">${l.date}</span>
-        <span style="color:var(--accent);font-weight:600;">${fmt(l.amount)}</span>
-      </div>`).join('');
+  logEl.innerHTML = `<div class="expense-list">${allLogs.slice(0, 20).map(l => `
+      <div class="exp-item" style="cursor:default;">
+        <div class="exp-icon-cell"><div class="exp-icon">💰</div></div>
+        <div class="exp-info-cell">
+          <div class="exp-name">${l.account}</div>
+          <div class="exp-meta"><span class="exp-meta-cat">${l.month}</span></div>
+        </div>
+        <div class="exp-amount-cell" style="color:var(--accent);">${fmt(l.amount)}</div>
+        <div class="exp-controls-cell"></div>
+      </div>`).join('')}</div>`;
   }
 }
 
@@ -1240,17 +1245,22 @@ function renderRecurring(){
     list.innerHTML='<div class="empty"><div class="ico">↻</div><p>No recurring expenses yet. Add rent, subscriptions, etc.</p></div>';
     return;
   }
-  list.innerHTML = S.recurring.map(r=>`
-    <div class="rec-item">
-      <div class="rec-info">
-        <div class="rec-name">${r.name}</div>
-        <div class="rec-meta">${r.cat} · ${typeTag(r.type)}</div>
+  list.innerHTML = `<div class="expense-list">${S.recurring.map(r=>{
+    const icon = r.cat.split(' ')[0];
+    const catName = r.cat.split(' ').slice(1).join(' ');
+    return `<div class="exp-item" style="cursor:default;">
+      <div class="exp-icon-cell"><div class="exp-icon">${icon}</div></div>
+      <div class="exp-info-cell">
+        <div class="exp-name">${r.name}</div>
+        <div class="exp-meta">
+          <span class="exp-meta-cat">${catName}</span>
+          <span class="exp-meta-type">${typeTag(r.type)}</span>
+        </div>
       </div>
-      <div class="rec-controls">
-        <div class="rec-amount">${fmt(r.amount)}</div>
-        <button class="btn-icon del" onclick="delRecurring('${r.id}')">✕</button>
-      </div>
-    </div>`).join('');
+      <div class="exp-amount-cell">${fmt(r.amount)}</div>
+      <div class="exp-controls-cell"><div class="exp-controls" style="opacity:1;"><button class="btn-icon del" onclick="delRecurring('${r.id}')">✕</button></div></div>
+    </div>`;
+  }).join('')}</div>`;
 }
 
 function addRecurring(){
