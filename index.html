@@ -331,7 +331,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.1</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.2</div>
   </aside>
 
   <main class="main">
@@ -1104,7 +1104,18 @@ const SAV_ACCOUNTS = [
 ];
 
 function getSavings() {
-  try { return JSON.parse(localStorage.getItem('yitsy_savings')) || initSavings(); }
+  try { 
+    const data = JSON.parse(localStorage.getItem('yitsy_savings')) || initSavings();
+    // Clean up old manual update logs that logged full balance instead of contribution
+    SAV_ACCOUNTS.forEach(a => {
+      if(data[a.id] && data[a.id].log) {
+        // Only keep entries that have a month field (from applyRecurring) 
+        // Old manual entries without month field are balance snapshots, not contributions
+        data[a.id].log = data[a.id].log.filter(l => l.month);
+      }
+    });
+    return data;
+  }
   catch(e) { return initSavings(); }
 }
 function initSavings() {
@@ -1196,16 +1207,18 @@ function renderSavings() {
   if (!allLogs.length) {
     logEl.innerHTML = '<div class="empty"><p>No contributions logged yet. Update an account to log a contribution.</p></div>';
   } else {
-  logEl.innerHTML = `<div class="expense-list">${allLogs.slice(0, 20).map(l => `
-      <div class="exp-item" style="cursor:default;">
-        <div class="exp-icon-cell"><div class="exp-icon">💰</div></div>
-        <div class="exp-info-cell">
-          <div class="exp-name">${l.account}</div>
-          <div class="exp-meta"><span class="exp-meta-cat">${l.month}</span></div>
-        </div>
-        <div class="exp-amount-cell" style="color:var(--accent);">${fmt(l.amount)}</div>
-        <div class="exp-controls-cell"></div>
-      </div>`).join('')}</div>`;
+  logEl.innerHTML = `<div class="expense-list">${allLogs.slice(0, 20).map(l => {
+    const displayDate = l.month || (l.date ? l.date.substring(0,7) : '—');
+    return `<div class="exp-item" style="cursor:default;">
+      <div class="exp-icon-cell"><div class="exp-icon">💰</div></div>
+      <div class="exp-info-cell">
+        <div class="exp-name">${l.account}</div>
+        <div class="exp-meta"><span class="exp-meta-cat">${displayDate}</span></div>
+      </div>
+      <div class="exp-amount-cell" style="color:var(--accent);">${fmt(l.amount)}</div>
+      <div class="exp-controls-cell"></div>
+    </div>`;
+  }).join('')}</div>`;
   }
 }
 
