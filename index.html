@@ -331,16 +331,16 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.2</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.3</div>
   </aside>
 
   <main class="main">
 
     <!-- DASHBOARD -->
     <div class="view active" id="view-dashboard">
-      <div class="page-header">
-        <h2 id="dash-title">Overview</h2>
-        <p id="dash-sub">Your monthly snapshot</p>
+      <div style="padding:16px 0 18px;">
+        <p style="font-size:13px;color:var(--text-muted);margin:0 0 2px;">Overview</p>
+        <h1 id="dash-sub" style="font-family:'Instrument Serif',serif;font-size:38px;letter-spacing:-1px;margin:0;">April 2026</h1>
       </div>
       <div class="cc-bar" id="cc-bar"></div>
       <div id="bim-bar-wrap"></div>
@@ -871,7 +871,6 @@ function renderDash(){
   const bimT = es.filter(e=>e.type==='bim').reduce((a,e)=>a+e.amount,0);
   const {m} = parseKey(S.cur);
 
-  document.getElementById('dash-title').textContent = "Overview";
   document.getElementById('dash-sub').textContent = monthLabel(S.cur);
 
   document.getElementById('cc-bar').innerHTML=`
@@ -1385,8 +1384,11 @@ async function confirmApplyRecurring(){
     savData[a.id].log.push({ month: S.cur, amount, date: dateStr });
   });
   saveSavings(savData);
-
-  renderDash(); renderExpenses(); renderSavings();
+  setTimeout(() => {
+    renderDash(); 
+    renderExpenses(); 
+    renderSavings();
+  }, 50);
   showToast(`Done! ${added} expenses + savings updated ✓`);
 }
 
