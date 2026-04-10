@@ -331,7 +331,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.5</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.6</div>
   </aside>
 
   <main class="main">
@@ -1135,11 +1135,25 @@ function initSavings() {
 }
 function saveSavings(data) { localStorage.setItem('yitsy_savings', JSON.stringify(data)); }
 
+// Calculate balance for a specific month by adding contributions up to that month
+function balanceForMonth(acct, upToMonth) {
+  const base = acct.initialBalance || acct.balance || 0;
+  const log = acct.log || [];
+  // If no log entries, return current balance
+  if(!log.length) return acct.balance || 0;
+  // Sum all contributions up to and including upToMonth
+  const contributions = log
+    .filter(l => l.month && l.month <= upToMonth)
+    .reduce((sum, l) => sum + (l.amount || 0), 0);
+  return base + contributions;
+}
+
 function renderSavings() {
   const data = getSavings();
+  const viewMonth = S.cur; // Use currently viewed month
   let totalBalance = 0, totalMonthly = 0;
   SAV_ACCOUNTS.forEach(a => {
-    totalBalance += data[a.id].balance || 0;
+    totalBalance += balanceForMonth(data[a.id], viewMonth);
     totalMonthly += data[a.id].monthly || 0;
   });
 
@@ -1149,7 +1163,9 @@ function renderSavings() {
 
   // Render account cards — combined couple card + individual kids
   const yitsy = data['yitsy'], shula = data['shulamit'];
-  const coupleBalance = (yitsy.balance||0) + (shula.balance||0);
+  const yitsyBal = balanceForMonth(yitsy, viewMonth);
+  const shulaBal = balanceForMonth(shula, viewMonth);
+  const coupleBalance = yitsyBal + shulaBal;
   const coupleMonthly = (yitsy.monthly||0) + (shula.monthly||0);
 
   const coupleCard = `<div class="savings-card" style="grid-column:1/-1;">
@@ -1167,10 +1183,11 @@ function renderSavings() {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       ${['yitsy','shulamit'].map(id => {
         const acct = data[id];
+        const displayBal = balanceForMonth(acct, viewMonth);
         const person = id === 'yitsy' ? '👨 Yitsy' : '👩 Shulamit';
         return `<div style="background:var(--surface3);border-radius:var(--radius-sm);padding:14px;">
           <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">${person}</div>
-          <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent);margin-bottom:10px;">${fmt(acct.balance)}</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent);margin-bottom:10px;">${fmt(displayBal)}</div>
           <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
             <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0" onblur="liveFormat(this)"></div>
             <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.monthly)}" placeholder="0" onblur="liveFormat(this)"></div>
@@ -1184,6 +1201,7 @@ function renderSavings() {
 
   const kidCards = ['ayala','meital'].map(id => {
     const acct = data[id];
+    const displayBal = balanceForMonth(acct, viewMonth);
     const a = SAV_ACCOUNTS.find(x=>x.id===id);
     return `<div class="savings-card">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
@@ -1193,7 +1211,7 @@ function renderSavings() {
           <div style="font-size:11px;color:var(--text-dim);">🏛 ${acct.provider||'Harel'}</div>
         </div>
       </div>
-      <div class="savings-card-balance">${fmt(acct.balance)}</div>
+      <div class="savings-card-balance">${fmt(displayBal)}</div>
       <div class="savings-card-monthly">Monthly direct debit: <strong>${fmt(acct.monthly)}</strong></div>
       <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;">
         <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0" onblur="liveFormat(this)"></div>
@@ -1237,26 +1255,18 @@ function updateSavings(id) {
   const newBalance = parseInput(document.getElementById(`sav-bal-${id}`).value);
   const newMonthly = parseInput(document.getElementById(`sav-mo-${id}`).value);
   const newProvider = document.getElementById(`sav-prov-${id}`).value.trim() || 'Harel';
-  const oldBalance = data[id].balance || 0;
-  const diff = newBalance - oldBalance;
 
+  // Store as initial balance — this is the base all future calculations start from
   data[id].balance = newBalance;
+  data[id].initialBalance = newBalance;
   data[id].monthly = newMonthly;
   data[id].provider = newProvider;
-
-  // Log the change if balance changed
-  if (diff !== 0) {
-    if (!data[id].log) data[id].log = [];
-    const today = new Date();
-    data[id].log.unshift({
-      date: `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`,
-      amount: diff,
-    });
-  }
+  // Clear log when manually setting balance — fresh start from this point
+  data[id].log = [];
 
   saveSavings(data);
   renderSavings();
-  showToast('Savings updated ✓');
+  showToast('Savings updated ✓ — this is now the base balance');
 }
 
 // ═══════════════════════════════════════
