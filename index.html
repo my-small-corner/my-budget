@@ -107,24 +107,14 @@
   .panel-action:hover { text-decoration: underline; }
 
   /* EXPENSE ROWS */
-  .expense-list { width: 100%; display: table; border-collapse: collapse; }
-  .exp-item { display: table-row; cursor: pointer; }
-  .exp-item:hover .exp-icon-cell,
-  .exp-item:hover .exp-info-cell,
-  .exp-item:hover .exp-amount-cell,
-  .exp-item:hover .exp-controls-cell { background: var(--surface2); }
-  .exp-icon-cell, .exp-info-cell, .exp-amount-cell, .exp-controls-cell { display: table-cell; padding: 8px 4px; vertical-align: middle; border-bottom: 1px solid var(--border); }
-  .exp-icon-cell { width: 36px; padding-left: 2px; }
-  .exp-info-cell { width: auto; }
-  .exp-amount-cell { width: 120px; text-align: right; white-space: nowrap; font-size: 13.5px; font-weight: 600; color: var(--red); font-variant-numeric: tabular-nums; padding-right: 10px; }
-  .exp-controls-cell { width: 28px; padding-right: 2px; }
-  .exp-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; background: var(--surface3); }
-  .exp-name { font-size: 13px; font-weight: 500; }
-  .exp-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 0; }
-  .exp-meta-cat { width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 0; }
-  .exp-meta-type { width: 120px; flex-shrink: 0; }
-  .exp-meta-date { width: 85px; flex-shrink: 0; white-space: nowrap; }
-  .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; justify-content: flex-end; }
+  .expense-list { display: flex; flex-direction: column; gap: 2px; }
+  .exp-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--radius-sm); transition: background 0.12s; width: 100%; }
+  .exp-item:hover { background: var(--surface2); }
+  .exp-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; background: var(--surface3); flex-shrink: 0; }
+  .exp-name { font-size: 13.5px; font-weight: 500; }
+  .exp-meta { font-size: 11px; color: var(--text-dim); display: flex; gap: 5px; align-items: center; margin-top: 1px; flex-wrap: nowrap; }
+  .exp-amount { font-size: 13.5px; font-weight: 600; color: var(--red); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; margin-left: auto; padding-left: 12px; flex-shrink: 0; min-width: 90px; }
+  .exp-controls { opacity: 0; transition: opacity 0.12s; display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
   .exp-item:hover .exp-controls { opacity: 1; }
   .btn-icon { background: none; border: none; cursor: pointer; color: var(--text-dim); font-size: 13px; padding: 3px 5px; border-radius: 4px; transition: all 0.12s; }
   .btn-icon.del:hover { color: var(--red); background: var(--surface3); }
@@ -325,22 +315,22 @@
           <div class="month-name" id="sb-month">—</div>
           <button class="month-nav-btn" onclick="changeMonth(1)">›</button>
         </div>
-        <div class="cc-due-badge" id="cc-due-badge">💳 Credit Card charges: 10th</div>
+        <div class="cc-due-badge">💳 CC charges: 10th</div>
       </div>
     </div>
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.6</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v5.0</div>
   </aside>
 
   <main class="main">
 
     <!-- DASHBOARD -->
     <div class="view active" id="view-dashboard">
-      <div style="padding:16px 0 18px;">
-        <p style="font-size:13px;color:var(--text-muted);margin:0 0 2px;">Overview</p>
-        <h1 id="dash-sub" style="font-family:'Instrument Serif',serif;font-size:38px;letter-spacing:-1px;margin:0;">April 2026</h1>
+      <div class="page-header">
+        <h2 id="dash-title">Overview</h2>
+        <p id="dash-sub">Your monthly snapshot</p>
       </div>
       <div class="cc-bar" id="cc-bar"></div>
       <div id="bim-bar-wrap"></div>
@@ -354,7 +344,7 @@
         <div style="display:flex;flex-direction:column;gap:18px;">
           <div class="panel">
             <div class="panel-header"><span class="panel-title">This Month's Expenses</span><button class="panel-action" onclick="showView('expenses')">+ Add expense</button></div>
-            <div class="expense-list" id="dash-list"><div class="loading"><div class="spinner"></div> Loading expenses…</div></div>
+            <div id="dash-list"><div class="loading"><div class="spinner"></div> Loading expenses…</div></div>
           </div>
           <div class="panel" style="flex:1;">
             <div class="panel-header"><span class="panel-title">Category Breakdown</span></div>
@@ -366,7 +356,7 @@
           <div class="ai-msgs" id="q-msgs"></div>
           <div class="chips">
             <button class="chip" onclick="qAsk('How am I doing this month?')">How am I doing?</button>
-            <button class="chip" onclick="qAsk(`What will my Credit Card charge be on the ${S.ccDate||10}th?`)">CC on ${S.ccDate||10}th?</button>
+            <button class="chip" onclick="qAsk('What will my CC charge be on the 10th?')">CC on 10th?</button>
             <button class="chip" onclick="qAsk('Any bimonthly bills due this month?')">Bimonthly bills?</button>
             <button class="chip" onclick="qAsk('Where can I save money?')">Save more</button>
           </div>
@@ -505,17 +495,11 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
         <div class="panel">
           <div class="panel-header"><span class="panel-title">Spending by Category</span></div>
-          <div style="display:flex;align-items:center;gap:16px;">
-            <div id="chart-cat-legend" style="flex:1;min-width:0;"></div>
-            <div style="width:180px;height:180px;flex-shrink:0;"><canvas id="chart-cat"></canvas></div>
-          </div>
+          <div class="chart-wrap"><canvas id="chart-cat"></canvas></div>
         </div>
         <div class="panel">
           <div class="panel-header"><span class="panel-title">Payment Type Breakdown</span></div>
-          <div style="display:flex;align-items:center;gap:16px;">
-            <div id="chart-type-legend" style="flex:1;min-width:0;"></div>
-            <div style="width:180px;height:180px;flex-shrink:0;"><canvas id="chart-type"></canvas></div>
-          </div>
+          <div class="chart-wrap"><canvas id="chart-type"></canvas></div>
         </div>
       </div>
       <div class="panel">
@@ -581,14 +565,6 @@
           <div class="sett-row">
             <div class="sett-info"><label>Site Password</label><p>Change your login password</p></div>
             <input class="pw-inp" id="pw-inp" type="password" placeholder="New password…">
-          </div>
-          <div class="sett-row">
-            <div class="sett-info"><label>Credit Card Charge Date</label><p>Day of month CC is charged</p></div>
-            <select class="fsel" id="cc-date-inp" style="width:140px;height:38px;">
-              <option value="5">5th of the month</option>
-              <option value="10" selected>10th of the month</option>
-              <option value="15">15th of the month</option>
-            </select>
           </div>
         </div>
 
@@ -671,7 +647,7 @@ Object.defineProperty(window,'CATS',{get:()=>getCats()});
 let S = {
   salary: 0,
   bankBalance: 0,
-  ccDate: 10,
+  bankBalanceByMonth: {},
   catBudgets: {},
   recurring: [],
   cur: null,
@@ -699,7 +675,7 @@ function loadLocal(){
   if(!S.cur) S.cur=curKey();
 }
 function saveLocal(){
-  localStorage.setItem('yitsy_settings', JSON.stringify({salary:S.salary,bankBalance:S.bankBalance,ccDate:S.ccDate,catBudgets:S.catBudgets,recurring:S.recurring,cur:S.cur}));
+  localStorage.setItem('yitsy_settings', JSON.stringify({salary:S.salary,bankBalance:S.bankBalance,bankBalanceByMonth:S.bankBalanceByMonth,catBudgets:S.catBudgets,recurring:S.recurring,cur:S.cur}));
 }
 
 // ═══════════════════════════════════════
@@ -772,7 +748,6 @@ function showView(id){
 function changeMonth(d){
   S.cur = d<0 ? prevKey(S.cur) : nextKey(S.cur);
   saveLocal();
-  showView('dashboard');
   loadExpenses();
 }
 
@@ -838,8 +813,6 @@ async function loadExpenses(){
 
 function renderSidebar(){
   document.getElementById('sb-month').textContent = monthLabel(S.cur);
-  const badge = document.getElementById('cc-due-badge');
-  if(badge) badge.textContent = `💳 Credit Card charges: ${S.ccDate || 10}th`;
 }
 
 function typeTag(t){
@@ -855,21 +828,20 @@ function typeTag(t){
 function expRow(e){
   const icon = e.cat.split(' ')[0];
   const catName = e.cat.split(' ').slice(1).join(' ');
-  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:var(--accent2);text-decoration:none;" title="View bill">📄</a>` : '';
+  const billBtn = e.driveUrl ? `<a href="${e.driveUrl}" target="_blank"><button class="btn-icon view-bill" title="View bill">📄</button></a>` : '';
   const datePaid = e.datePaid || '—';
-  return `<div class="exp-item" onclick="editExp('${e.id}')" title="Click to edit">
-    <div class="exp-icon-cell"><div class="exp-icon">${icon}</div></div>
-    <div class="exp-info-cell">
+  return `<div class="exp-item" onclick="editExp('${e.id}')" style="cursor:pointer;" title="Click to edit">
+    <div class="exp-icon">${icon}</div>
+    <div style="min-width:0;flex:1;">
       <div class="exp-name">${e.name}</div>
       <div class="exp-meta">
-        <span class="exp-meta-cat">${catName}</span>
-        <span class="exp-meta-type">${typeTag(e.type)}</span>
-        <span class="exp-meta-date">${datePaid}</span>
-        ${billBtn}
+        <span style="min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${catName}</span>
+        <span style="min-width:100px;">${typeTag(e.type)}</span>
+        <span style="white-space:nowrap;">${datePaid}</span>
       </div>
     </div>
-    <div class="exp-amount-cell">${fmt(e.amount)}</div>
-    <div class="exp-controls-cell"><div class="exp-controls" onclick="event.stopPropagation()"><button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div></div>
+    <div class="exp-amount">${fmt(e.amount)}</div>
+    <div class="exp-controls" onclick="event.stopPropagation()">${billBtn}<button class="btn-icon del" onclick="delExp('${e.id}')">✕</button></div>
   </div>`;
 }
 
@@ -882,12 +854,13 @@ function renderDash(){
   const bimT = es.filter(e=>e.type==='bim').reduce((a,e)=>a+e.amount,0);
   const {m} = parseKey(S.cur);
 
+  document.getElementById('dash-title').textContent = "Overview";
   document.getElementById('dash-sub').textContent = monthLabel(S.cur);
 
-  const ccDate = S.ccDate || 10;
   document.getElementById('cc-bar').innerHTML=`
-    <span class="det">💳 All Credit Cards will be charged on the <strong>${ccDate}th</strong> of the month</span>
-    <span class="cc-right">Total: <strong>${fmt(ccT)}</strong></span>`;
+    <span class="lbl">💳 Credit Card</span>
+    <span class="det">All CC purchases charged on <strong>10th ${MF[m]}</strong></span>
+    <span class="cc-right">CC total: <strong>${fmt(ccT)}</strong></span>`;
 
   const bimWrap = document.getElementById('bim-bar-wrap');
   bimWrap.innerHTML = bimT>0
@@ -899,7 +872,7 @@ function renderDash(){
   document.getElementById('s-count').textContent = es.length+' item'+(es.length!==1?'s':'');
   document.getElementById('s-remaining').textContent = fmt(rem);
   document.getElementById('s-rem-lbl').textContent = rem<0 ? '⚠ Over budget!' : `${fmt(income)} - ${fmt(total)}`;
-  document.getElementById('s-bank').textContent = fmt(S.bankBalance);
+  document.getElementById('s-bank').textContent = fmt(S.bankBalanceByMonth[S.cur] ?? S.bankBalance);
 
   const dl = document.getElementById('dash-list');
   dl.innerHTML = es.length
@@ -910,8 +883,12 @@ function renderDash(){
   const bars = document.getElementById('cat-bars');
   const usedCats = [...new Set(es.map(e=>e.cat))];
   if(!usedCats.length){ bars.innerHTML='<div class="empty"><p>Add expenses to see breakdown</p></div>'; return; }
-  bars.innerHTML = usedCats.map(cat=>{
-    const spent = es.filter(e=>e.cat===cat).reduce((a,e)=>a+e.amount,0);
+  // Build cat→spent map first, then sort by amount descending for consistency
+  const catSpentMap = {};
+  usedCats.forEach(cat => { catSpentMap[cat] = es.filter(e=>e.cat===cat).reduce((a,e)=>a+e.amount,0); });
+  const sortedCats = usedCats.slice().sort((a,b) => catSpentMap[b] - catSpentMap[a]);
+  bars.innerHTML = sortedCats.map(cat=>{
+    const spent = catSpentMap[cat];
     const lim = S.catBudgets[cat]||0;
     const pct = lim>0 ? Math.min(100,(spent/lim)*100) : 0;
     const col = CCOLS[CATS.indexOf(cat)%CCOLS.length]||'var(--accent)';
@@ -925,7 +902,7 @@ function renderDash(){
 
 function renderExpenses(){
   const {m} = parseKey(S.cur);
-  document.getElementById('exp-sub').textContent = `${monthLabel(S.cur)} · Credit Card charges ${S.ccDate||10}th ${MF[m]}`;
+  document.getElementById('exp-sub').textContent = `${monthLabel(S.cur)} · CC charged 10th ${MF[m]}`;
 
   const typeFilter = document.getElementById('exp-filter-type')?.value || 'all';
   const catFilter = document.getElementById('exp-filter-cat')?.value || 'all';
@@ -950,7 +927,7 @@ function renderExpenses(){
 
   // Define type groups
   const TYPE_GROUPS = [
-    {key:'cc',    label:'💳 Credit Card',   note:'charged ${S.ccDate||10}th'},
+    {key:'cc',    label:'💳 Credit Card',   note:'charged 10th'},
     {key:'debit', label:'💰 Debit Card',    note:''},
     {key:'bank',  label:'🏦 Bank Transfer', note:''},
     {key:'cash',  label:'💵 Cash',          note:''},
@@ -967,17 +944,13 @@ function renderExpenses(){
     if(!items.length) return '';
     const groupTotal = items.reduce((a,e)=>a+e.amount,0);
     const rows = [...items].sort((a,b)=>b.amount-a.amount).map(expRow).join('');
-    return `<div class="panel" style="break-inside:avoid;padding:16px 22px;">
-      <div style="display:table;width:100%;margin-bottom:10px;">
-        <div style="display:table-row;">
-          <div style="display:table-cell;width:36px;"></div>
-          <div style="display:table-cell;">
-            <div style="font-size:14px;font-weight:600;">${g.label}</div>
-            ${g.note?`<div style="font-size:11px;color:var(--text-dim);">${g.note}</div>`:''}
-          </div>
-          <div style="display:table-cell;width:120px;text-align:right;font-size:15px;font-weight:700;color:var(--red);font-variant-numeric:tabular-nums;padding-right:10px;">${fmt(groupTotal)}</div>
-          <div style="display:table-cell;width:28px;"></div>
+    return `<div class="panel" style="break-inside:avoid;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${g.label}</div>
+          ${g.note?`<div style="font-size:11px;color:var(--text-dim);">${g.note}</div>`:''}
         </div>
+        <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--red);">${fmt(groupTotal)}</div>
       </div>
       <div class="expense-list">${rows}</div>
     </div>`;
@@ -1114,18 +1087,7 @@ const SAV_ACCOUNTS = [
 ];
 
 function getSavings() {
-  try { 
-    const data = JSON.parse(localStorage.getItem('yitsy_savings')) || initSavings();
-    // Clean up old manual update logs that logged full balance instead of contribution
-    SAV_ACCOUNTS.forEach(a => {
-      if(data[a.id] && data[a.id].log) {
-        // Only keep entries that have a month field (from applyRecurring) 
-        // Old manual entries without month field are balance snapshots, not contributions
-        data[a.id].log = data[a.id].log.filter(l => l.month);
-      }
-    });
-    return data;
-  }
+  try { return JSON.parse(localStorage.getItem('yitsy_savings')) || initSavings(); }
   catch(e) { return initSavings(); }
 }
 function initSavings() {
@@ -1135,25 +1097,11 @@ function initSavings() {
 }
 function saveSavings(data) { localStorage.setItem('yitsy_savings', JSON.stringify(data)); }
 
-// Calculate balance for a specific month by adding contributions up to that month
-function balanceForMonth(acct, upToMonth) {
-  const base = acct.initialBalance || acct.balance || 0;
-  const log = acct.log || [];
-  // If no log entries, return current balance
-  if(!log.length) return acct.balance || 0;
-  // Sum all contributions up to and including upToMonth
-  const contributions = log
-    .filter(l => l.month && l.month <= upToMonth)
-    .reduce((sum, l) => sum + (l.amount || 0), 0);
-  return base + contributions;
-}
-
 function renderSavings() {
   const data = getSavings();
-  const viewMonth = S.cur; // Use currently viewed month
   let totalBalance = 0, totalMonthly = 0;
   SAV_ACCOUNTS.forEach(a => {
-    totalBalance += balanceForMonth(data[a.id], viewMonth);
+    totalBalance += data[a.id].balance || 0;
     totalMonthly += data[a.id].monthly || 0;
   });
 
@@ -1163,9 +1111,7 @@ function renderSavings() {
 
   // Render account cards — combined couple card + individual kids
   const yitsy = data['yitsy'], shula = data['shulamit'];
-  const yitsyBal = balanceForMonth(yitsy, viewMonth);
-  const shulaBal = balanceForMonth(shula, viewMonth);
-  const coupleBalance = yitsyBal + shulaBal;
+  const coupleBalance = (yitsy.balance||0) + (shula.balance||0);
   const coupleMonthly = (yitsy.monthly||0) + (shula.monthly||0);
 
   const coupleCard = `<div class="savings-card" style="grid-column:1/-1;">
@@ -1183,11 +1129,10 @@ function renderSavings() {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       ${['yitsy','shulamit'].map(id => {
         const acct = data[id];
-        const displayBal = balanceForMonth(acct, viewMonth);
         const person = id === 'yitsy' ? '👨 Yitsy' : '👩 Shulamit';
         return `<div style="background:var(--surface3);border-radius:var(--radius-sm);padding:14px;">
           <div style="font-size:12px;font-weight:600;margin-bottom:10px;color:var(--text-muted);">${person}</div>
-          <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent);margin-bottom:10px;">${fmt(displayBal)}</div>
+          <div style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--accent);margin-bottom:10px;">${fmt(acct.balance)}</div>
           <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
             <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0" onblur="liveFormat(this)"></div>
             <div><div class="savings-inp-label">Monthly ₪</div><input class="savings-inp" id="sav-mo-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.monthly)}" placeholder="0" onblur="liveFormat(this)"></div>
@@ -1201,7 +1146,6 @@ function renderSavings() {
 
   const kidCards = ['ayala','meital'].map(id => {
     const acct = data[id];
-    const displayBal = balanceForMonth(acct, viewMonth);
     const a = SAV_ACCOUNTS.find(x=>x.id===id);
     return `<div class="savings-card">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
@@ -1211,7 +1155,7 @@ function renderSavings() {
           <div style="font-size:11px;color:var(--text-dim);">🏛 ${acct.provider||'Harel'}</div>
         </div>
       </div>
-      <div class="savings-card-balance">${fmt(displayBal)}</div>
+      <div class="savings-card-balance">${fmt(acct.balance)}</div>
       <div class="savings-card-monthly">Monthly direct debit: <strong>${fmt(acct.monthly)}</strong></div>
       <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-top:12px;">
         <div><div class="savings-inp-label">Balance ₪</div><input class="savings-inp" id="sav-bal-${id}" type="text" inputmode="numeric" value="${fmtInput(acct.balance)}" placeholder="0" onblur="liveFormat(this)"></div>
@@ -1235,18 +1179,12 @@ function renderSavings() {
   if (!allLogs.length) {
     logEl.innerHTML = '<div class="empty"><p>No contributions logged yet. Update an account to log a contribution.</p></div>';
   } else {
-  logEl.innerHTML = `<div class="expense-list">${allLogs.slice(0, 20).map(l => {
-    const displayDate = l.month || (l.date ? l.date.substring(0,7) : '—');
-    return `<div class="exp-item" style="cursor:default;">
-      <div class="exp-icon-cell"><div class="exp-icon">💰</div></div>
-      <div class="exp-info-cell">
-        <div class="exp-name">${l.account}</div>
-        <div class="exp-meta"><span class="exp-meta-cat">${displayDate}</span></div>
-      </div>
-      <div class="exp-amount-cell" style="color:var(--accent);">${fmt(l.amount)}</div>
-      <div class="exp-controls-cell"></div>
-    </div>`;
-  }).join('')}</div>`;
+    logEl.innerHTML = allLogs.slice(0, 20).map(l => `
+      <div class="savings-history-row">
+        <span>${l.account}</span>
+        <span style="color:var(--text-muted);font-size:12px;">${l.date}</span>
+        <span style="color:var(--accent);font-weight:600;">${fmt(l.amount)}</span>
+      </div>`).join('');
   }
 }
 
@@ -1255,18 +1193,26 @@ function updateSavings(id) {
   const newBalance = parseInput(document.getElementById(`sav-bal-${id}`).value);
   const newMonthly = parseInput(document.getElementById(`sav-mo-${id}`).value);
   const newProvider = document.getElementById(`sav-prov-${id}`).value.trim() || 'Harel';
+  const oldBalance = data[id].balance || 0;
+  const diff = newBalance - oldBalance;
 
-  // Store as initial balance — this is the base all future calculations start from
   data[id].balance = newBalance;
-  data[id].initialBalance = newBalance;
   data[id].monthly = newMonthly;
   data[id].provider = newProvider;
-  // Clear log when manually setting balance — fresh start from this point
-  data[id].log = [];
+
+  // Log the change if balance changed
+  if (diff !== 0) {
+    if (!data[id].log) data[id].log = [];
+    const today = new Date();
+    data[id].log.unshift({
+      date: `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`,
+      amount: diff,
+    });
+  }
 
   saveSavings(data);
   renderSavings();
-  showToast('Savings updated ✓ — this is now the base balance');
+  showToast('Savings updated ✓');
 }
 
 // ═══════════════════════════════════════
@@ -1278,22 +1224,17 @@ function renderRecurring(){
     list.innerHTML='<div class="empty"><div class="ico">↻</div><p>No recurring expenses yet. Add rent, subscriptions, etc.</p></div>';
     return;
   }
-  list.innerHTML = `<div class="expense-list">${S.recurring.map(r=>{
-    const icon = r.cat.split(' ')[0];
-    const catName = r.cat.split(' ').slice(1).join(' ');
-    return `<div class="exp-item" style="cursor:default;">
-      <div class="exp-icon-cell"><div class="exp-icon">${icon}</div></div>
-      <div class="exp-info-cell">
-        <div class="exp-name">${r.name}</div>
-        <div class="exp-meta">
-          <span class="exp-meta-cat">${catName}</span>
-          <span class="exp-meta-type">${typeTag(r.type)}</span>
-        </div>
+  list.innerHTML = S.recurring.map(r=>`
+    <div class="rec-item">
+      <div class="rec-info">
+        <div class="rec-name">${r.name}</div>
+        <div class="rec-meta">${r.cat} · ${typeTag(r.type)}</div>
       </div>
-      <div class="exp-amount-cell">${fmt(r.amount)}</div>
-      <div class="exp-controls-cell"><div class="exp-controls" style="opacity:1;"><button class="btn-icon del" onclick="delRecurring('${r.id}')">✕</button></div></div>
-    </div>`;
-  }).join('')}</div>`;
+      <div class="rec-controls">
+        <div class="rec-amount">${fmt(r.amount)}</div>
+        <button class="btn-icon del" onclick="delRecurring('${r.id}')">✕</button>
+      </div>
+    </div>`).join('');
 }
 
 function addRecurring(){
@@ -1320,66 +1261,7 @@ function renderApplyMonth(){
 }
 
 async function applyRecurring(){
-  if(!S.recurring.length && !SAV_ACCOUNTS.length){ showToast('Nothing to apply'); return; }
-
-  // Build confirmation modal
-  const savData = getSavings();
-  const monthLabel_ = monthLabel(S.cur);
-
-  // Check if savings already applied this month
-  const savAlreadyApplied = SAV_ACCOUNTS.every(a => {
-    const log = savData[a.id].log || [];
-    return log.find(l => l.month === S.cur);
-  });
-
-  const savRows = SAV_ACCOUNTS.map(a => {
-    const acct = savData[a.id];
-    const alreadyDone = (acct.log||[]).find(l=>l.month===S.cur);
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
-      <span style="font-size:18px;">${a.emoji}</span>
-      <div style="flex:1;">
-        <div style="font-size:13px;font-weight:500;">${a.name}</div>
-        <div style="font-size:11px;color:var(--text-dim);">Current: ${fmt(acct.balance||0)}</div>
-      </div>
-      <input id="sav-apply-${a.id}" type="text" inputmode="numeric" value="${fmtInput(alreadyDone ? alreadyDone.amount : acct.monthly||0)}" 
-        onblur="liveFormat(this)"
-        style="width:90px;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;color:var(--text);font-family:inherit;font-size:13px;text-align:right;">
-      ${alreadyDone ? `<span style="font-size:10px;color:var(--accent);">✓ applied</span>` : ''}
-    </div>`;
-  }).join('');
-
-  // Show modal
-  const modal = document.createElement('div');
-  modal.id = 'apply-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:420px;max-width:95vw;">
-      <h3 style="margin:0 0 4px;font-size:16px;">Apply Recurring — ${monthLabel_}</h3>
-      <p style="margin:0 0 16px;font-size:12px;color:var(--text-muted);">Review and confirm monthly savings contributions</p>
-      <div style="margin-bottom:20px;">${savRows}</div>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button onclick="document.getElementById('apply-modal').remove()" 
-          style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 16px;color:var(--text-muted);font-family:inherit;cursor:pointer;">Cancel</button>
-        <button onclick="confirmApplyRecurring()" 
-          style="background:var(--accent);color:#0d0f14;border:none;border-radius:var(--radius-sm);padding:8px 20px;font-family:inherit;font-weight:600;cursor:pointer;">✓ Apply</button>
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-}
-
-async function confirmApplyRecurring(){
-  // Read savings amounts BEFORE removing modal
-  const savInputs = {};
-  SAV_ACCOUNTS.forEach(a => {
-    const inp = document.getElementById(`sav-apply-${a.id}`);
-    if(inp) savInputs[a.id] = parseInput(inp.value);
-  });
-
-  document.getElementById('apply-modal')?.remove();
-
-  // Apply expenses
-  showToast('Applying…');
-  await loadExpenses();
+  if(!S.recurring.length){ showToast('No recurring expenses set up'); return; }
   const today = new Date();
   const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
   let added = 0;
@@ -1392,33 +1274,8 @@ async function confirmApplyRecurring(){
       added++;
     }
   }
-
-  // Apply savings contributions
-  const savData = getSavings();
-  SAV_ACCOUNTS.forEach(a => {
-    const amount = savInputs[a.id];
-    if(!amount || amount <= 0) return;
-    
-    // Remove old entry for this month if exists (re-applying)
-    const oldEntry = (savData[a.id].log||[]).find(l=>l.month===S.cur);
-    if(oldEntry){
-      // Subtract old amount first
-      savData[a.id].balance = (savData[a.id].balance || 0) - oldEntry.amount;
-      savData[a.id].log = savData[a.id].log.filter(l=>l.month!==S.cur);
-    }
-    
-    // Add new amount
-    savData[a.id].balance = (savData[a.id].balance || 0) + amount;
-    if(!savData[a.id].log) savData[a.id].log = [];
-    savData[a.id].log.push({ month: S.cur, amount, date: dateStr });
-  });
-  saveSavings(savData);
-  setTimeout(() => {
-    renderDash(); 
-    renderExpenses(); 
-    renderSavings();
-  }, 50);
-  showToast(`Done! ${added} expenses + savings updated ✓`);
+  renderDash(); renderExpenses();
+  showToast(added>0 ? `Added ${added} recurring expenses ✓` : 'All recurring already added this month');
 }
 
 // ═══════════════════════════════════════
@@ -1426,55 +1283,41 @@ async function confirmApplyRecurring(){
 // ═══════════════════════════════════════
 let chartCat=null, chartType=null, chartTrend=null;
 
-function buildLegend(labels, colors, data, containerId){
-  const total = data.reduce((a,b)=>a+b,0);
-  const el = document.getElementById(containerId);
-  if(!el) return;
-  el.innerHTML = labels.map((l,i)=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);">
-      <div style="width:10px;height:10px;border-radius:3px;background:${colors[i]};flex-shrink:0;"></div>
-      <div style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l}</div>
-      <div style="font-size:12px;font-weight:600;color:var(--red);white-space:nowrap;font-variant-numeric:tabular-nums;">${fmt(data[i])}</div>
-      <div style="font-size:11px;color:var(--text-dim);width:32px;text-align:right;">${total>0?Math.round(data[i]/total*100):0}%</div>
-    </div>`).join('');
-}
-
 async function renderCharts(){
   document.getElementById('charts-sub').textContent = monthLabel(S.cur);
   const es = currentExpenses;
 
+  // Destroy old charts
   if(chartCat){ chartCat.destroy(); chartCat=null; }
   if(chartType){ chartType.destroy(); chartType=null; }
   if(chartTrend){ chartTrend.destroy(); chartTrend=null; }
 
-  const noLegend = { plugins: { legend: { display: false } } };
+  const chartDefaults = {
+    plugins: { legend: { labels: { color: '#7a82a0', font: { family: 'DM Sans', size: 12 } } } },
+    scales: {}
+  };
 
   // Category donut
   const byCat = {};
   es.forEach(e=>{ byCat[e.cat]=(byCat[e.cat]||0)+e.amount; });
-  const catLabels = Object.keys(byCat).sort((a,b)=>byCat[b]-byCat[a]);
+  const catLabels = Object.keys(byCat);
   const catData = catLabels.map(c=>byCat[c]);
-  const catColors = catLabels.map((_,i)=>CCOLS[i%CCOLS.length]);
-  buildLegend(catLabels, catColors, catData, 'chart-cat-legend');
+  const catColors = catLabels.map(c=>CCOLS[CATS.indexOf(c)%CCOLS.length]);
+
   chartCat = new Chart(document.getElementById('chart-cat'), {
     type: 'doughnut',
     data: { labels: catLabels, datasets: [{ data: catData, backgroundColor: catColors, borderWidth: 0 }] },
-    options: { ...noLegend, cutout: '65%' }
+    options: { ...chartDefaults, cutout: '65%' }
   });
 
-  // Type breakdown — all types
-  const typeMap = {cc:'💳 Credit Card', debit:'💰 Debit Card', bank:'🏦 Bank Transfer', cash:'💵 Cash', cibus:'🍱 Cibus', bim:'🔄 Bimonthly', reg:'📋 Regular'};
-  const typeColors = {cc:'#818cf8', debit:'#34d399', bank:'#60a5fa', cash:'#22c55e', cibus:'#fb923c', bim:'#fbbf24', reg:'#6ee7b7'};
-  const typeLabels = [], typeData = [], typeColArr = [];
-  Object.entries(typeMap).forEach(([k,l])=>{
-    const t = es.filter(e=>e.type===k).reduce((a,e)=>a+e.amount,0);
-    if(t>0){ typeLabels.push(l); typeData.push(t); typeColArr.push(typeColors[k]); }
-  });
-  buildLegend(typeLabels, typeColArr, typeData, 'chart-type-legend');
+  // Type breakdown
+  const ccT = es.filter(e=>e.type==='cc').reduce((a,e)=>a+e.amount,0);
+  const bimT = es.filter(e=>e.type==='bim').reduce((a,e)=>a+e.amount,0);
+  const regT = es.filter(e=>e.type==='reg').reduce((a,e)=>a+e.amount,0);
   chartType = new Chart(document.getElementById('chart-type'), {
     type: 'doughnut',
-    data: { labels: typeLabels, datasets: [{ data: typeData, backgroundColor: typeColArr, borderWidth: 0 }] },
-    options: { ...noLegend, cutout: '65%' }
+    data: { labels: ['💳 Credit Card','🔄 Bimonthly','📋 Regular'], datasets: [{ data: [ccT,bimT,regT], backgroundColor: ['#818cf8','#fbbf24','#6ee7b7'], borderWidth: 0 }] },
+    options: { ...chartDefaults, cutout: '65%' }
   });
 
   // Trend — last 6 months
@@ -1527,7 +1370,7 @@ async function renderCharts(){
 async function renderHistory(){
   allMonthKeys = await fetchAllMonths();
   if(!allMonthKeys.includes(S.cur)) allMonthKeys.unshift(S.cur);
-  allMonthKeys.sort(); // oldest first, left to right
+  allMonthKeys.sort().reverse();
 
   document.getElementById('hist-tabs').innerHTML = allMonthKeys.map(k=>
     `<button class="mtab${k===S.cur?' active':''}" onclick="histTab('${k}')">${monthShort(k)}</button>`).join('');
@@ -1535,9 +1378,9 @@ async function renderHistory(){
 }
 
 async function histTab(k){
-  S.cur=k; saveLocal(); renderSidebar();
   document.querySelectorAll('.mtab').forEach(t=>t.classList.toggle('active', t.textContent===monthShort(k)));
-  const es = k===S.cur ? currentExpenses : await fetchFromSheets(k);
+  const isCurrent = k === S.cur;
+  const es = isCurrent ? currentExpenses : await fetchFromSheets(k);
   renderHistDetail(k, es);
 }
 
@@ -1597,9 +1440,7 @@ function parseInput(str){
 
 function renderSettings(){
   document.getElementById('inc-inp').value = fmtInput(S.salary);
-  document.getElementById('bank-inp').value = fmtInput(S.bankBalance);
-  const ccDateEl = document.getElementById('cc-date-inp');
-  if(ccDateEl) ccDateEl.value = S.ccDate || 10;
+  document.getElementById('bank-inp').value = fmtInput(S.bankBalanceByMonth[S.cur] ?? S.bankBalance);
   // Populate category name datalist
   const dl = document.getElementById('existing-cats');
   if(dl) dl.innerHTML = getCats().slice().sort((a,b)=>a.localeCompare(b)).map(c=>`<option value="${c.split(' ').slice(1).join(' ')}">`).join('');
@@ -1688,8 +1529,10 @@ function rebuildDropdowns(){
 
 function saveSettings(){
   S.salary = parseInput(document.getElementById('inc-inp').value);
-  S.bankBalance = parseInput(document.getElementById('bank-inp').value);
-  S.ccDate = parseInt(document.getElementById('cc-date-inp').value) || 10;
+  const newBalance = parseInput(document.getElementById('bank-inp').value);
+  if(!S.bankBalanceByMonth) S.bankBalanceByMonth = {};
+  S.bankBalanceByMonth[S.cur] = newBalance;
+  S.bankBalance = newBalance; // keep legacy field in sync for AI context
   const newPw = document.getElementById('pw-inp').value;
   if(newPw) localStorage.setItem('yitsy_pw', newPw);
   document.querySelectorAll('.lim-inp').forEach(i=>{
@@ -1721,8 +1564,9 @@ function buildContext(){
 
 BILLING SETUP:
 - Salary is paid monthly. Monthly income: ₪${S.salary}
+- Bank balance for ${monthLabel(S.cur)}: ₪${S.bankBalanceByMonth[S.cur] ?? S.bankBalance}
 - Rent is paid monthly
-- Credit card (Israeli) charges go out on the ${S.ccDate||10}th of every month
+- Credit card (Israeli) charges go out on the 10th of every month
 - Bimonthly bills (electricity, gas, water, arnona) come every 2 months — marked as "Bimonthly" in the app
 
 SAVINGS ACCOUNTS:
@@ -1732,7 +1576,7 @@ SAVINGS ACCOUNTS:
 
 CURRENT MONTH: ${monthLabel(S.cur)}
 - Total expenses: ₪${total} | Remaining: ₪${rem}
-- CC total (charged ${S.ccDate||10}th ${MF[m]}): ₪${ccT}
+- CC total (charged 10th ${MF[m]}): ₪${ccT}
 - Bimonthly bills: ₪${bimT}
 - Savings rate: ${S.salary>0?Math.round((rem/S.salary)*100):0}%
 - By category: ${JSON.stringify(byCat)}
@@ -1810,10 +1654,10 @@ async function init(){
   setTimeout(()=>{
     const {m}=parseKey(S.cur);
     if(!document.getElementById('q-msgs').hasChildNodes()){
-      addMsg('q-msgs','assistant',`שלום! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — Credit Card charges out on ${S.ccDate||10}th ${MF[m]}.\n\nAsk me anything!`);
+      addMsg('q-msgs','assistant',`שלום! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — CC charges out on 10th ${MF[m]}.\n\nAsk me anything!`);
     }
     if(!document.getElementById('f-msgs').hasChildNodes()){
-      addMsg('f-msgs','assistant',`שלום! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• Credit Card charged every ${S.ccDate||10}th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
+      addMsg('f-msgs','assistant',`שלום! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• CC charged every 10th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
     }
   },500);
 }
