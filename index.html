@@ -279,8 +279,14 @@
   .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent2); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 17px; font-size: 13px; color: var(--text); transform: translateY(80px); opacity: 0; transition: all 0.25s; z-index: 1000; }
-  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translate(-50%, 90px); background: var(--accent); color: #0d0f14; border-radius: 10px; padding: 12px 22px; font-size: 14px; font-weight: 600; box-shadow: 0 8px 28px rgba(0,0,0,0.45); opacity: 0; transition: all 0.25s; z-index: 1000; pointer-events: none; }
+  .toast::before { content: '✓  '; }
+  .toast.warn { background: #fbbf24; }
+  .toast.warn::before { content: '!  '; }
+  .toast.info { background: var(--surface3); color: var(--text); border: 1px solid var(--border); font-weight: 500; }
+  .toast.info::before { content: ''; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  button.saved { background: var(--accent) !important; color: #0d0f14 !important; border-color: var(--accent) !important; }
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
@@ -332,7 +338,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v6.8</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v7.0</div>
   </aside>
 
   <main class="main">
@@ -414,7 +420,7 @@
       <!-- IMPORT BILLS -->
       <details class="panel" style="margin-bottom:18px;" id="imp-box">
         <summary style="cursor:pointer;font-size:14px;font-weight:600;">📥 Import bills <span id="imp-month" style="font-weight:400;color:var(--text-muted);font-size:12.5px;margin-left:6px;"></span></summary>
-        <p style="font-size:12.5px;color:var(--text-muted);margin:12px 0 8px;line-height:1.5;">One bill per line: <strong>Name | Amount | Category | Type | Date</strong>. Only name and amount are required. Category is the name without the emoji, Type is credit card, debit, bank, cash, cibus, bimonthly or regular (default: debit), and Date is YYYY-MM-DD (default: today). A bill whose name already exists this month is skipped.</p>
+        <p style="font-size:12.5px;color:var(--text-muted);margin:12px 0 8px;line-height:1.5;">One bill per line: <strong>Name | Amount | Category | Type | Date</strong>. Only name and amount are required. Category is the name without the emoji, Type is credit card, debit, bank, cash, cibus, bimonthly or regular (default: debit), and Date is YYYY-MM-DD. A bill goes into the month of its date (with no date, into the month you're viewing), so a whole year can be pasted at once. A bill whose name already exists in that month is skipped.</p>
         <textarea id="imp-text" rows="6" spellcheck="false" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;resize:vertical;" placeholder="Electricity | 1785.86 | Electricity | bimonthly | 2026-11-03&#10;Gas | 120 | Gas | bimonthly"></textarea>
         <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
           <button class="btn-add" onclick="impPreview()">Preview</button>
@@ -488,19 +494,24 @@
     <div class="view" id="view-portfolio">
       <div class="page-header">
         <h2>Portfolio</h2>
-        <p>Investments across platforms — dated snapshots that you update yourself</p>
+        <p>Investment holdings only — dated snapshots that you update yourself. Bank cash, pension, keren hishtalmut and the family's Kupat Gemel are not included here.</p>
       </div>
       <div class="savings-total-card">
         <div>
-          <div class="savings-total-label">📈 Total Portfolio</div>
+          <div class="savings-total-label" id="pf-title">📈 Investments</div>
           <div class="savings-total-value" id="pf-total">₪0</div>
           <div class="savings-total-sub" id="pf-sub">—</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Growth / Defensive</div>
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;">Equity / Bonds</div>
           <div style="font-size:22px;font-family:'Instrument Serif',serif;color:var(--text-muted);" id="pf-split">—</div>
         </div>
       </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+        <button class="btn-add" id="pf-refresh" onclick="pfRefresh()">↻ Refresh prices</button>
+        <span id="pf-refreshed" style="font-size:12px;color:var(--text-dim);"></span>
+      </div>
+      <div id="pf-skipped" style="font-size:12px;color:var(--yellow);margin-bottom:14px;"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
         <div class="panel"><div class="panel-header"><span class="panel-title">By platform</span></div><div id="pf-by-platform"></div></div>
         <div class="panel"><div class="panel-header"><span class="panel-title">By type</span></div><div id="pf-by-type"></div></div>
@@ -516,6 +527,8 @@
           <div class="fg"><label>Platform</label><input class="fi" id="pf-p" list="pf-plats" placeholder="Psagot" style="width:110px;"><datalist id="pf-plats"><option value="Mizrahi"><option value="Psagot"><option value="Hapoalim"><option value="Leumi"></datalist></div>
           <div class="fg"><label>Type</label><select class="fsel" id="pf-t"><option value="equity">Equity</option><option value="bond">Bonds</option><option value="mm">Money market</option><option value="cash">Cash</option></select></div>
           <div class="fg"><label>Value ₪</label><input class="fi am" id="pf-v" type="text" inputmode="numeric" placeholder="0" onblur="liveFormat(this)"></div>
+          <div class="fg"><label>Ticker (optional)</label><input class="fi" id="pf-k" placeholder="e.g. VUSA.LON" style="width:120px;"></div>
+          <div class="fg"><label>Prices in</label><select class="fsel" id="pf-c"><option value="">₪ / no refresh</option><option value="GBP">GBP</option><option value="USD">USD</option><option value="EUR">EUR</option></select></div>
           <div class="fg"><label>As of</label><input class="fi dt" id="pf-d" type="date"></div>
           <button class="btn-add" onclick="pfAdd()">+ Add</button>
         </div>
@@ -597,7 +610,11 @@
     <div class="view" id="view-history">
       <div class="page-header"><h2>History</h2><p>Month by month comparison</p></div>
       <button class="export-btn" onclick="exportCSV()">⬇ Export this month as CSV</button>
-      <div class="month-tabs" id="hist-tabs"></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap;">
+        <select class="fsel" id="hist-month" onchange="histPick()" style="height:36px;"></select>
+        <select class="fsel" id="hist-year" onchange="histPick()" style="height:36px;"></select>
+        <span style="font-size:12px;color:var(--text-dim);">● = month has expenses</span>
+      </div>
       <div class="hist-stats">
         <div class="stat-card income"><div class="stat-label">Income</div><div class="stat-value" id="h-inc">₪0</div></div>
         <div class="stat-card expense"><div class="stat-label">Expenses</div><div class="stat-value" id="h-exp">₪0</div></div>
@@ -1342,6 +1359,7 @@ function updateSavings(id) {
   saveSavings(data);
   renderSavings();
   showToast('Savings updated ✓ — this is now the base balance');
+  flashBtn(`button[onclick="updateSavings('${id}')"]`);
 }
 
 // ═══════════════════════════════════════
@@ -1391,16 +1409,23 @@ const PF_TYPES = {
 };
 const PF_PLAT_COLORS = ['#818cf8','#6ee7b7','#fbbf24','#60a5fa','#f472b6','#fb923c'];
 
+const PF_TICKERS = {'pf-vusa':['VUSA.LON','GBP'], 'pf-vwrp':['VWRP.LON','GBP'], 'pf-cnx1':['CNX1.LON','USD'], 'pf-is15':['IS15.LON','GBP']};
+function pfApplyTickers(p){
+  let changed = false;
+  p.forEach(h=>{ if(PF_TICKERS[h.id] && h.ticker===undefined){ h.ticker = PF_TICKERS[h.id][0]; h.ccy = PF_TICKERS[h.id][1]; changed = true; } });
+  return changed;
+}
 function getPortfolio(){
-  try{ const p = JSON.parse(localStorage.getItem('yitsy_portfolio')); if(Array.isArray(p)) return p; }catch(e){}
+  try{ const p = JSON.parse(localStorage.getItem('yitsy_portfolio')); if(Array.isArray(p)){ if(pfApplyTickers(p)) localStorage.setItem('yitsy_portfolio', JSON.stringify(p)); return p; } }catch(e){}
   // Starting values: dated snapshots from 14 Oct 2026 — update them as they change
   const seed = [
     {id:'pf-bonds', name:'Rabobank & Goldman Sachs bonds', platform:'Mizrahi', type:'bond',   value:195782, asOf:'2026-10-14'},
     {id:'pf-is15',  name:'IS15 corporate-bond ETF',        platform:'Mizrahi', type:'bond',   value:119858, asOf:'2026-10-14'},
     {id:'pf-vusa',  name:'VUSA S&P 500 ETF',               platform:'Mizrahi', type:'equity', value:42306,  asOf:'2026-10-14'},
     {id:'pf-cnx1',  name:'CNX1 Nasdaq ETF',                platform:'Mizrahi', type:'equity', value:37778,  asOf:'2026-10-14'},
-    {id:'pf-vwrp',  name:'VWRP global equity (incl. small cash)', platform:'Psagot', type:'equity', value:40545, asOf:'2026-10-14'},
+    {id:'pf-vwrp',  name:'VWRP global equity (includes a small cash balance)', platform:'Psagot', type:'equity', value:40545, asOf:'2026-10-14'},
   ];
+  pfApplyTickers(seed);
   localStorage.setItem('yitsy_portfolio', JSON.stringify(seed));
   return seed;
 }
@@ -1423,19 +1448,25 @@ function pfBars(rows, total){
 function renderPortfolio(){
   const items = getPortfolio();
   const total = items.reduce((a,h)=>a+(h.value||0),0);
-  let growth = 0;
+  let growth = 0, bonds = 0, otherAmt = 0;
   const byPlat = {}, byType = {};
   items.forEach(h=>{
     const t = PF_TYPES[h.type] || PF_TYPES.cash;
     if(t.growth) growth += h.value||0;
+    else if(h.type==='bond') bonds += h.value||0;
+    else otherAmt += h.value||0;
     const pl = h.platform || 'Other';
     byPlat[pl] = (byPlat[pl]||0) + (h.value||0);
     byType[h.type] = (byType[h.type]||0) + (h.value||0);
   });
-  const gPct = total>0 ? Math.round(growth/total*100) : 0;
+  const eqPct = total>0 ? Math.round(growth/total*100) : 0;
+  const bdPct = total>0 ? Math.round(bonds/total*100) : 0;
+  const othPct = otherAmt>0 ? Math.max(0, 100-eqPct-bdPct) : 0;
+  const plats = [...new Set(items.map(h=>h.platform||'Other'))];
+  document.getElementById('pf-title').textContent = '📈 ' + (plats.length ? plats.join(' + ') + ' investments' : 'Investments');
   document.getElementById('pf-total').textContent = fmt(total);
-  document.getElementById('pf-sub').textContent = `${items.length} holdings · values as of the dates shown`;
-  document.getElementById('pf-split').textContent = `${gPct}% / ${100-gPct}%`;
+  document.getElementById('pf-sub').textContent = `${items.length} holdings · values as of the dates shown, not today's valuation`;
+  document.getElementById('pf-split').textContent = `${eqPct}% equity / ${bdPct}% bonds` + (othPct ? ` / ${othPct}% cash & other` : '');
   document.getElementById('pf-by-platform').innerHTML = pfBars(Object.entries(byPlat).map(([k,v],i)=>[k,v,PF_PLAT_COLORS[i%PF_PLAT_COLORS.length]]), total);
   document.getElementById('pf-by-type').innerHTML = pfBars(Object.entries(byType).map(([k,v])=>[(PF_TYPES[k]||PF_TYPES.cash).label, v, (PF_TYPES[k]||PF_TYPES.cash).color]), total);
 
@@ -1446,6 +1477,7 @@ function renderPortfolio(){
     const stale = (age!==null && age>30) ? `<div style="font-size:10px;color:var(--yellow);margin-top:2px;">${age} days old</div>` : '';
     return `<tr style="border-bottom:1px solid var(--border);">
       <td style="padding:9px 4px;"><div style="font-weight:500;font-size:13px;">${esc(h.name)}</div><div style="font-size:11px;color:var(--text-dim);">${esc(h.platform||'—')} · ${t.label}</div></td>
+      <td style="padding:9px 4px;width:200px;white-space:nowrap;"><input class="savings-inp" id="pf-k-${h.id}" type="text" value="${esc(h.ticker||'')}" placeholder="Ticker" style="width:100px;"> <select class="fsel" id="pf-c-${h.id}" style="height:34px;width:66px;"><option value="" ${!h.ccy?'selected':''}>₪</option>${['GBP','USD','EUR'].map(c=>`<option value="${c}" ${h.ccy===c?'selected':''}>${c}</option>`).join('')}</select></td>
       <td style="padding:9px 4px;width:130px;"><input class="savings-inp" id="pf-v-${h.id}" type="text" inputmode="numeric" value="${fmtInput(h.value||0)}" style="width:115px;text-align:right;" onblur="liveFormat(this)"></td>
       <td style="padding:9px 4px;width:150px;"><input class="savings-inp" id="pf-d-${h.id}" type="date" value="${h.asOf||''}" style="width:140px;">${stale}</td>
       <td style="padding:9px 4px;width:100px;text-align:right;white-space:nowrap;"><button class="savings-update-btn" onclick="pfSave('${h.id}')">Save</button> <button class="btn-icon del" onclick="pfDel('${h.id}')">✕</button></td>
@@ -1455,6 +1487,65 @@ function renderPortfolio(){
     ? `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">${rows}</table></div>`
     : '<div class="empty"><p>No holdings yet. Add one below.</p></div>';
   const dEl = document.getElementById('pf-d'); if(dEl && !dEl.value) dEl.value = todayStr();
+  const rf = localStorage.getItem('yitsy_pf_refreshed');
+  document.getElementById('pf-refreshed').textContent = rf ? 'Prices last refreshed ' + new Date(rf).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Only holdings with a ticker are refreshed';
+}
+// Closing value on or before a date. rows are [date, close], newest first.
+function pfCloseOn(rows, date){
+  for(const r of rows){ if(r[0] <= date) return r; }
+  return null;
+}
+async function pfFetchRows(url, step, total){
+  for(let attempt=0; attempt<4; attempt++){
+    showToast(`Fetching prices ${step}/${total}…`);
+    let r, j = {};
+    try{ r = await fetch(url); j = await r.json(); }catch(e){ throw new Error('could not reach the price service'); }
+    if(r.ok && Array.isArray(j.rows) && j.rows.length) return j.rows;
+    if(j.limited && attempt<3){ showToast(`Free API limit reached, waiting 15 seconds (${step}/${total})…`); await new Promise(res=>setTimeout(res,15000)); continue; }
+    throw new Error(j.error || 'the price service returned no data');
+  }
+  throw new Error('the price service is busy, try again in a minute');
+}
+// Scales each holding's saved value by how its price (and the exchange rate) moved since its "as of" date.
+// Holdings without a ticker (e.g. individual bonds) are left alone, and a failure never overwrites a value.
+async function pfRefresh(){
+  const items = getPortfolio();
+  const tracked = items.filter(h=>h.ticker);
+  if(!tracked.length){ showToast('Enter a ticker on a holding first'); return; }
+  const btn = document.getElementById('pf-refresh'); btn.disabled = true;
+  const skippedBox = document.getElementById('pf-skipped'); skippedBox.textContent = '';
+  try{
+    const symbols = [...new Set(tracked.map(h=>h.ticker))];
+    const ccys = [...new Set(tracked.map(h=>h.ccy).filter(c=>c && c!=='ILS'))];
+    const total = symbols.length + ccys.length; let step = 0;
+    const series = {}, fx = {};
+    for(const sym of symbols) series[sym] = await pfFetchRows('/api/quotes?symbol=' + encodeURIComponent(sym), ++step, total);
+    for(const c of ccys) fx[c] = await pfFetchRows('/api/quotes?from=' + c, ++step, total);
+    let updated = 0; const skipped = [];
+    tracked.forEach(h=>{
+      const rows = series[h.ticker];
+      const latest = rows[0];
+      const base = pfCloseOn(rows, h.asOf);
+      if(!base){ skipped.push(`${h.name}: its "as of" date is older than the price history available, set it to a recent date`); return; }
+      let f = 1;
+      if(h.ccy && h.ccy!=='ILS'){
+        const fNow = pfCloseOn(fx[h.ccy], latest[0]), fBase = pfCloseOn(fx[h.ccy], h.asOf);
+        if(!fNow || !fBase){ skipped.push(`${h.name}: no ${h.ccy}/₪ rate for those dates`); return; }
+        f = fNow[1] / fBase[1];
+      }
+      h.value = Math.round(h.value * (latest[1]/base[1]) * f * 100) / 100;
+      h.asOf = latest[0];
+      updated++;
+    });
+    savePortfolio(items);
+    localStorage.setItem('yitsy_pf_refreshed', new Date().toISOString());
+    renderPortfolio();
+    if(skipped.length) document.getElementById('pf-skipped').textContent = 'Skipped: ' + skipped.join(' · ');
+    showToast(updated ? `Updated ${updated} holding${updated>1?'s':''} ✓` : 'Nothing could be updated');
+  }catch(e){
+    showToast('Error: ' + e.message);
+  }
+  btn.disabled = false;
 }
 function pfAdd(){
   const name = document.getElementById('pf-n').value.trim();
@@ -1464,9 +1555,11 @@ function pfAdd(){
   const asOf = document.getElementById('pf-d').value || todayStr();
   if(!name || isNaN(value) || value<=0){ showToast('Enter a name and value'); return; }
   const items = getPortfolio();
-  items.push({id:uid(), name, platform, type, value, asOf});
+  const ticker = (document.getElementById('pf-k').value||'').trim().toUpperCase();
+  const ccy = document.getElementById('pf-c').value || '';
+  items.push({id:uid(), name, platform, type, value, asOf, ticker, ccy});
   savePortfolio(items);
-  document.getElementById('pf-n').value=''; document.getElementById('pf-v').value='';
+  document.getElementById('pf-n').value=''; document.getElementById('pf-v').value=''; document.getElementById('pf-k').value='';
   renderPortfolio();
   showToast('Holding added ✓');
 }
@@ -1477,9 +1570,12 @@ function pfSave(id){
   if(isNaN(v) || v<0){ showToast('Enter a valid value'); return; }
   h.value = v;
   h.asOf = document.getElementById('pf-d-'+id).value || todayStr();
+  h.ticker = (document.getElementById('pf-k-'+id).value||'').trim().toUpperCase();
+  h.ccy = document.getElementById('pf-c-'+id).value || '';
   savePortfolio(items);
   renderPortfolio();
   showToast('Saved ✓');
+  flashBtn(`button[onclick="pfSave('${id}')"]`);
 }
 function pfDel(id){
   if(!confirm('Remove this holding?')) return;
@@ -1618,9 +1714,13 @@ function impDefaultDate(){
   const t = todayStr();
   return t.startsWith(S.cur) ? t : `${S.cur}-01`;
 }
-function impPreview(){
+async function impPreview(){
+  const box = document.getElementById('imp-preview');
+  const go = document.getElementById('imp-go');
   const lines = document.getElementById('imp-text').value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
-  const seen = new Set();
+  if(!lines.length){ box.innerHTML='<div style="color:var(--text-dim);font-size:13px;">Paste at least one line first.</div>'; go.style.display='none'; return; }
+  box.innerHTML = '<div style="color:var(--text-dim);font-size:13px;">Checking against your Sheet…</div>';
+  go.style.display = 'none';
   impRows = lines.map(line=>{
     const parts = (line.includes('|') ? line.split('|') : line.includes('\t') ? line.split('\t') : line.split(';')).map(x=>x.trim());
     const [name, amtStr, catStr, typeStr, dateStr] = parts;
@@ -1632,17 +1732,24 @@ function impPreview(){
     if(tk && !IMP_TYPES[tk]){ r.type='debit'; r.notes.push(`type "${typeStr}" not understood, using debit`); } else r.type = tk ? IMP_TYPES[tk] : 'debit';
     const d = impParseDate(dateStr);
     if(d===null){ r.date = impDefaultDate(); r.notes.push(`date "${dateStr}" not understood, using ${r.date}`); } else r.date = d || impDefaultDate();
-    if(r.status==='new'){
-      const key = r.name.toLowerCase();
-      if(seen.has(key) || currentExpenses.some(e=>(e.name||'').toLowerCase()===key && e.month===S.cur)){ r.status='dup'; r.notes.push('already exists this month, skipped'); }
-      seen.add(key);
-    }
+    r.month = (typeof d==='string' && d) ? d.slice(0,7) : S.cur;
     return r;
   });
-  const box = document.getElementById('imp-preview');
-  const go = document.getElementById('imp-go');
-  if(!impRows.length){ box.innerHTML='<div style="color:var(--text-dim);font-size:13px;">Paste at least one line first.</div>'; go.style.display='none'; return; }
+  // Look up what already exists in every month that appears in the paste
+  const existing = {};
+  for(const m of [...new Set(impRows.filter(r=>r.status==='new').map(r=>r.month))]){
+    try{ existing[m] = (m===S.cur) ? currentExpenses : await fetchFromSheets(m); }catch(e){ existing[m] = null; }
+  }
+  const seen = new Set();
+  impRows.forEach(r=>{
+    if(r.status!=='new') return;
+    const key = r.name.toLowerCase()+'|'+r.month;
+    if(existing[r.month]===null){ r.status='err'; r.notes.push(`could not check ${r.month} in your Sheet`); }
+    else if(seen.has(key) || (existing[r.month]||[]).some(e=>(e.name||'').toLowerCase()===r.name.toLowerCase())){ r.status='dup'; r.notes.push('already exists that month, skipped'); }
+    seen.add(key);
+  });
   const nNew = impRows.filter(r=>r.status==='new').length;
+  const nMonths = new Set(impRows.filter(r=>r.status==='new').map(r=>r.month)).size;
   box.innerHTML = `<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12.5px;">${impRows.map(r=>{
     const icon = r.status==='new' ? '✓' : r.status==='dup' ? '↷' : '✗';
     const col = r.status==='new' ? 'var(--accent)' : r.status==='dup' ? 'var(--yellow)' : 'var(--red)';
@@ -1654,8 +1761,8 @@ function impPreview(){
       <td style="padding:7px 4px;color:var(--text-muted);">${r.status==='err'?'':esc(r.date)}</td>
       <td style="padding:7px 4px;text-align:right;font-weight:600;color:var(--red);white-space:nowrap;">${r.status==='err'?'':fmt(r.amount)}</td>
     </tr>`;}).join('')}</table></div>
-    <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">${nNew} to add to ${monthLabel(S.cur)}${impRows.length-nNew?` · ${impRows.length-nNew} skipped`:''}</div>`;
-  go.textContent = `Add ${nNew} to ${monthLabel(S.cur)}`;
+    <div style="font-size:12px;color:var(--text-muted);margin-top:8px;">${nNew} to add${nMonths>1?` across ${nMonths} months`:nMonths===1?` to ${monthLabel(impRows.find(r=>r.status==='new').month)}`:''}${impRows.length-nNew?` · ${impRows.length-nNew} skipped`:''}</div>`;
+  go.textContent = `Add ${nNew} bill${nNew===1?'':'s'}`;
   go.style.display = nNew ? '' : 'none';
 }
 async function impCommit(){
@@ -1665,19 +1772,19 @@ async function impCommit(){
   let done = 0;
   try{
     for(const r of todo){
-      const expense = {id:uid(), name:r.name, amount:r.amount, datePaid:r.date, cat:r.cat, type:r.type, month:S.cur, driveUrl:''};
+      const expense = {id:uid(), name:r.name, amount:r.amount, datePaid:r.date, cat:r.cat, type:r.type, month:r.month, driveUrl:''};
       await saveToSheets(expense);
-      currentExpenses.push(expense);
+      if(r.month===S.cur) currentExpenses.push(expense);
       done++;
       go.textContent = `Saving ${done}/${todo.length}…`;
     }
     document.getElementById('imp-text').value = '';
     document.getElementById('imp-preview').innerHTML = '';
     go.style.display = 'none';
-    showToast(`${done} bills added ✓`);
+    showToast(`${done} bill${done===1?'':'s'} added ✓`);
   }catch(err){
     showToast(`Stopped after ${done} of ${todo.length} — check your connection`);
-    impPreview(); // refresh: the ones already saved now show as "already exists"
+    await impPreview(); // refresh: the ones already saved now show as "already exists"
   }
   go.disabled = false;
   renderDash(); renderExpenses();
@@ -1811,6 +1918,7 @@ function buildLegend(labels, colors, data, containerId){
 
 async function renderCharts(){
   document.getElementById('charts-sub').textContent = monthLabel(S.cur);
+  if(typeof Chart === 'undefined'){ showToast('Could not load the charts library — check your connection'); return; }
   const es = currentExpenses;
 
   if(chartCat){ chartCat.destroy(); chartCat=null; }
@@ -1818,6 +1926,7 @@ async function renderCharts(){
   if(chartTrend){ chartTrend.destroy(); chartTrend=null; }
 
   const noLegend = { plugins: { legend: { display: false } } };
+  const chartDefaults = { plugins: { legend: { labels: { color: '#7a82a0', font: { family: 'DM Sans', size: 12 } } } } };
 
   // Category donut
   const byCat = {};
@@ -1896,17 +2005,27 @@ async function renderCharts(){
 // ═══════════════════════════════════════
 async function renderHistory(){
   allMonthKeys = await fetchAllMonths();
-  if(!allMonthKeys.includes(S.cur)) allMonthKeys.unshift(S.cur);
-  allMonthKeys.sort(); // oldest first, left to right
-
-  document.getElementById('hist-tabs').innerHTML = allMonthKeys.map(k=>
-    `<button class="mtab${k===S.cur?' active':''}" onclick="histTab('${k}')">${monthShort(k)}</button>`).join('');
+  if(!allMonthKeys.includes(S.cur)) allMonthKeys.push(S.cur);
+  histFillSelects(S.cur);
   renderHistDetail(S.cur, currentExpenses);
+}
+function histFillSelects(k){
+  const {y,m} = parseKey(k);
+  const years = new Set(allMonthKeys.map(x=>parseKey(x).y));
+  years.add(y); years.add(2026); years.add(new Date().getFullYear()); years.add(new Date().getFullYear()+1);
+  const ySel = document.getElementById('hist-year'), mSel = document.getElementById('hist-month');
+  ySel.innerHTML = [...years].sort().map(v=>`<option value="${v}">${v}</option>`).join('');
+  ySel.value = y;
+  mSel.innerHTML = MF.map((n,i)=>`<option value="${i}">${allMonthKeys.includes(mkey(y,i))?'● ':''}${n}</option>`).join('');
+  mSel.value = m;
+}
+function histPick(){
+  histTab(mkey(+document.getElementById('hist-year').value, +document.getElementById('hist-month').value));
 }
 
 async function histTab(k){
   S.cur=k; saveLocal(); renderSidebar();
-  document.querySelectorAll('.mtab').forEach(t=>t.classList.toggle('active', t.textContent===monthShort(k)));
+  histFillSelects(k);
   document.getElementById('h-tbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:28px;">Loading…</td></tr>';
   const es = await fetchFromSheets(k);
   if(S.cur!==k) return; // another month was clicked while this one loaded
@@ -2072,6 +2191,7 @@ function saveSettings(){
   });
   saveLocal(); renderDash(); renderSettings();
   showToast('Settings saved ✓');
+  flashBtn('.save-btn');
 }
 
 // ═══════════════════════════════════════
@@ -2166,8 +2286,20 @@ function sendF(){ const t=document.getElementById('f-inp').value.trim(); if(t)fA
 // ═══════════════════════════════════════
 let tT;
 function showToast(msg){
-  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'),2800);
+  const t=document.getElementById('toast'); t.textContent=msg;
+  const progress = /(…|\.\.\.)$/.test(msg);
+  const bad = !progress && /error|could not|stopped|^enter |^pick |^nothing|wrong/i.test(msg);
+  t.classList.toggle('info', progress);
+  t.classList.toggle('warn', bad);
+  t.classList.add('show');
+  clearTimeout(tT); tT=setTimeout(()=>t.classList.remove('show'), bad ? 4500 : 3200);
+}
+// Briefly turns a button green with "✓ Saved" so a save is visible right where you clicked
+function flashBtn(sel, label){
+  const b = document.querySelector(sel); if(!b) return;
+  const old = b.textContent;
+  b.textContent = label || '✓ Saved'; b.classList.add('saved');
+  setTimeout(()=>{ b.textContent = old; b.classList.remove('saved'); }, 1600);
 }
 
 // ═══════════════════════════════════════
