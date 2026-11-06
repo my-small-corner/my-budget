@@ -338,7 +338,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v7.0</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v7.1</div>
   </aside>
 
   <main class="main">
@@ -424,6 +424,7 @@
         <textarea id="imp-text" rows="6" spellcheck="false" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:inherit;font-size:13px;outline:none;resize:vertical;" placeholder="Electricity | 1785.86 | Electricity | bimonthly | 2026-11-03&#10;Gas | 120 | Gas | bimonthly"></textarea>
         <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
           <button class="btn-add" onclick="impPreview()">Preview</button>
+          <button class="btn-add" style="background:var(--surface3);color:var(--text);" onclick="impClear()">Clear</button>
           <button class="btn-add" id="imp-go" style="display:none;" onclick="impCommit()">Add</button>
         </div>
         <div id="imp-preview" style="margin-top:12px;"></div>
@@ -584,19 +585,20 @@
         <h2>Charts</h2>
         <p id="charts-sub">Visual breakdown of your spending</p>
       </div>
+      <div id="charts-error" style="color:var(--red);font-size:13px;margin-bottom:12px;"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:22px;">
         <div class="panel">
           <div class="panel-header"><span class="panel-title">Spending by Category</span></div>
           <div style="display:flex;align-items:center;gap:16px;">
             <div id="chart-cat-legend" style="flex:1;min-width:0;"></div>
-            <div style="width:180px;height:180px;flex-shrink:0;"><canvas id="chart-cat"></canvas></div>
+            <div style="position:relative;width:180px;height:180px;flex-shrink:0;"><canvas id="chart-cat"></canvas></div>
           </div>
         </div>
         <div class="panel">
           <div class="panel-header"><span class="panel-title">Payment Type Breakdown</span></div>
           <div style="display:flex;align-items:center;gap:16px;">
             <div id="chart-type-legend" style="flex:1;min-width:0;"></div>
-            <div style="width:180px;height:180px;flex-shrink:0;"><canvas id="chart-type"></canvas></div>
+            <div style="position:relative;width:180px;height:180px;flex-shrink:0;"><canvas id="chart-type"></canvas></div>
           </div>
         </div>
       </div>
@@ -717,7 +719,8 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>window.Chart || document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>')</script>
 <script>
 // ═══════════════════════════════════════
 // CONFIG — update PASSWORD here
@@ -880,7 +883,10 @@ async function saveToSheets(expense){
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'add', expense})
   });
-  return res.json();
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(!res.ok || data.error) throw new Error(data.error || ('HTTP ' + res.status));
+  return data;
 }
 
 async function deleteFromSheets(id){
@@ -1765,6 +1771,12 @@ async function impPreview(){
   go.textContent = `Add ${nNew} bill${nNew===1?'':'s'}`;
   go.style.display = nNew ? '' : 'none';
 }
+function impClear(){
+  document.getElementById('imp-text').value = '';
+  document.getElementById('imp-preview').innerHTML = '';
+  document.getElementById('imp-go').style.display = 'none';
+  impRows = [];
+}
 async function impCommit(){
   const todo = impRows.filter(r=>r.status==='new');
   if(!todo.length) return;
@@ -1778,10 +1790,17 @@ async function impCommit(){
       done++;
       go.textContent = `Saving ${done}/${todo.length}…`;
     }
-    document.getElementById('imp-text').value = '';
-    document.getElementById('imp-preview').innerHTML = '';
-    go.style.display = 'none';
-    showToast(`${done} bill${done===1?'':'s'} added ✓`);
+    // Read the months back from the Sheet to confirm everything really landed
+    go.textContent = 'Checking your Sheet…';
+    let verified = 0;
+    const byMonth = {};
+    todo.forEach(r=>{ (byMonth[r.month] = byMonth[r.month] || []).push(r); });
+    for(const m of Object.keys(byMonth)){
+      const rows = await fetchFromSheets(m);
+      byMonth[m].forEach(r=>{ if(rows.some(e=>(e.name||'').toLowerCase()===r.name.toLowerCase() && Math.abs((parseFloat(e.amount)||0)-r.amount)<0.005)) verified++; });
+    }
+    impClear();
+    showToast(verified===done ? `${done} bill${done===1?'':'s'} added and confirmed in your Sheet ✓` : `Saved ${done}, but only ${verified} show up in your Sheet — please check it`);
   }catch(err){
     showToast(`Stopped after ${done} of ${todo.length} — check your connection`);
     await impPreview(); // refresh: the ones already saved now show as "already exists"
@@ -1917,8 +1936,18 @@ function buildLegend(labels, colors, data, containerId){
 }
 
 async function renderCharts(){
+  const box = document.getElementById('charts-error');
+  if(box) box.textContent = '';
+  try{ await renderChartsInner(); }
+  catch(e){
+    console.error(e);
+    if(box) box.textContent = 'Charts could not be drawn: ' + e.message;
+    showToast('Error: charts could not be drawn');
+  }
+}
+async function renderChartsInner(){
   document.getElementById('charts-sub').textContent = monthLabel(S.cur);
-  if(typeof Chart === 'undefined'){ showToast('Could not load the charts library — check your connection'); return; }
+  if(typeof Chart === 'undefined') throw new Error('the charts library did not load (check your connection, or turn off an ad-blocker for this site)');
   const es = currentExpenses;
 
   if(chartCat){ chartCat.destroy(); chartCat=null; }
