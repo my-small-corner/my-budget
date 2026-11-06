@@ -338,7 +338,7 @@
     <div style="padding:0 16px 8px;">
       <button onclick="doLogout()" style="width:100%;background:none;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-dim)'">⎋ Logout</button>
     </div>
-    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v7.1</div>
+    <div style="text-align:center;padding:4px 0 4px;font-size:10px;color:var(--text-dim);letter-spacing:0.5px;">v7.2</div>
   </aside>
 
   <main class="main">
@@ -373,7 +373,7 @@
           <div class="ai-msgs" id="q-msgs"></div>
           <div class="chips">
             <button class="chip" onclick="qAsk('How am I doing this month?')">How am I doing?</button>
-            <button class="chip" onclick="qAsk(`What will my Credit Card charge be on the ${S.ccDate||10}th?`)">CC on ${S.ccDate||10}th?</button>
+            <button class="chip" onclick="qAsk(`What will my Credit Card charge be on the ${S.ccDate||10}th?`)" id="chip-cc">CC on 10th?</button>
             <button class="chip" onclick="qAsk('Any bimonthly bills due this month?')">Bimonthly bills?</button>
             <button class="chip" onclick="qAsk('Where can I save money?')">Save more</button>
           </div>
@@ -933,6 +933,7 @@ function renderSidebar(){
   document.getElementById('sb-month').textContent = monthLabel(S.cur);
   const badge = document.getElementById('cc-due-badge');
   if(badge) badge.textContent = `💳 Credit Card charges: ${S.ccDate || 10}th`;
+  const chip = document.getElementById('chip-cc'); if(chip) chip.textContent = 'CC on ' + (S.ccDate || 10) + 'th?';
 }
 
 function typeTag(t){
@@ -2066,10 +2067,11 @@ async function histTab(k){
 function renderHistDetail(k, es){
   const total=es.reduce((a,e)=>a+e.amount,0), rem=S.salary-total;
   const rate=S.salary>0?Math.round((rem/S.salary)*100):0;
-  document.getElementById('h-inc').textContent=fmt(S.salary);
-  document.getElementById('h-exp').textContent=fmt(total);
-  document.getElementById('h-rem').textContent=fmt(rem);
-  document.getElementById('h-rate').textContent=rate+'%';
+  const noData = !es.length;
+  document.getElementById('h-inc').textContent = noData ? '—' : fmt(S.salary);
+  document.getElementById('h-exp').textContent = noData ? '—' : fmt(total);
+  document.getElementById('h-rem').textContent = noData ? '—' : fmt(rem);
+  document.getElementById('h-rate').textContent = noData ? '—' : rate+'%';
   document.getElementById('h-tbody').innerHTML = es.length
     ? [...es].sort((a,b)=>b.amount-a.amount).map(e=>`
         <tr>
@@ -2346,7 +2348,7 @@ async function init(){
   setTimeout(()=>{
     const {m}=parseKey(S.cur);
     if(!document.getElementById('q-msgs').hasChildNodes()){
-      addMsg('q-msgs','assistant',`שלום! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. Currently viewing ${monthLabel(S.cur)} — Credit Card charges out on ${S.ccDate||10}th ${MF[m]}.\n\nAsk me anything!`);
+      addMsg('q-msgs','assistant',`שלום! 👋\n\nI'm your budget advisor. I can see your live expense data from Google Sheets. I'll answer about whichever month you're viewing.\n\nAsk me anything!`);
     }
     if(!document.getElementById('f-msgs').hasChildNodes()){
       addMsg('f-msgs','assistant',`שלום! I'm your personal finance advisor 🇮🇱\n\nI have full access to your live budget data. Here's what I know:\n• Monthly salary tracked\n• Credit Card charged every ${S.ccDate||10}th\n• Bimonthly bills (electricity, gas, water, arnona) flagged separately\n• All data stored in your Google Sheet\n\nWhat would you like to work on?`);
